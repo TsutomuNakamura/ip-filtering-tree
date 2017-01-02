@@ -1,5 +1,5 @@
 
-exports.IpDict = function() {
+exports.IPDict = function() {
 
     /** Instance of myself */
     const myself = this;
@@ -8,7 +8,7 @@ exports.IpDict = function() {
     const INT32_0 = ~~0;
 
     /** IPv4 subnet masks */
-    const ipv4NetMasks = (function () {
+    const iPv4NetMasks = (function () {
         var masks   = new Array(32 + 1);
         var mask    = ~~0xffffffff;
         var bit     = 0;
@@ -20,70 +20,190 @@ exports.IpDict = function() {
         return masks;
     })();
 
-    var ipv4Dict = {};
-    ipv4Dict[0] = [
-        undefined,          /* data */
-        0,                  /* length of subnetmask */
-        undefined,          /* length of child node's subnet mask */
-        {}                  /* next node */
+    var iPv4Dict = {};
+    iPv4Dict[0] = [         /* Network address */
+        undefined,          /* Data */
+        0,                  /* Length of subnetmask */
+        undefined,          /* Length of child node's subnet mask */
+        {}                  /* Next node */
     ];
 
-    /** Index of data on ipv4 dictionary  */
-    const I_IPV4_DATA = 0;
-    /** Index of length of subnetmask on ipv4 dictionary */
-    const I_IPV4_LENGTH_OF_SUBNETMASK = 1;
-    /** Index of length of child subnetmask on ipv4 dictionary */
+    /** Index of data on IPv4 dictionary  */
+    const I_IPV4_DATA                       = 0;
+    /** Index of length of subnetmask on IPv4 dictionary */
+    const I_IPV4_LENGTH_OF_SUBNETMASK       = 1;
+    /** Index of length of child subnetmask on IPv4 dictionary */
     const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 2;
+    /** Index of reference of child node */
+    const I_IPV4_REF_CHILD_NODE             = 3;
 
     /**
      * Push a data in database indexed by IPv4 network address.
-     * @param {string} ipv4  IPv4 address string for index
+     * @param {string} IPv4  IPv4 address string for index
      * @param {number} len   Length of network address for IPv4 address
      * @param {object} data  Data for push
      */
-    this.pushDataForIpv4 = function(ipv4, len, data) {
-        pushDataToIpv4Tree(ipv4Dict[0], ipv4StringToBinary(ipv4), );
+    this.pushDataForIPv4 = function(iPv4, len, data) {
+        myself.pushDataToIPv4Tree(iPv4Dict[0], myself.iPv4StringToBinary(iPv4), len, data);
     }
 
-    this.pushDataToIpv4Tree = function(oneNode, rawIpv4, subnetLen, data) {
-        var currentNodesSubnetLen = oneNode[I_IPV4_LENGTH_OF_SUBNETMASK];
+    /**
+     * Push data into IPv4 indexed tree.
+     * @param {object} node Current node of IPv4 indexed tree.
+     * @param {number} binIPv4 Binary IPv4 network address not as string.
+     */
+    this.pushDataToIPv4Tree = function(node, binIPv4, subnetLen, data) {
+        var subnetLenOfCurrentNode = node[I_IPV4_LENGTH_OF_SUBNETMASK];
+        if(subnetLenOfCurrentNode === subnetLen) {
+            // The data has already existed in thre tree
+            if(node[I_IPV4_DATA] !== subnetLen) {
+                throw new Error("Aboart pushing due to the data has already existed.");
+            }
+
+            // Override the data in this glue node.
+            node[I_IPV4_DATA] = data;
+
+            /* return */
+        } else {
+            if(Object.keys(node[I_IPV4_LENGTH_OF_SUBNETMASK]).length === 0) {
+                // Append the data into this node if this node didn't have any child nodes.
+                var netAddr4 = getBinIPv4NetAddr(binIPv4, subnetLen);
+                console.log(netAddr4);    /* TODO: */
+                node[I_IPV4_REF_CHILD_NODE][netAddr4]   = createNewOneNode(data, subnetLen, undefined, {});
+                node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = subnetLen;
+            } else {
+                // Append the data after some instruction is done.
+                var childSubnetLen = node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
+                if(childSubnetLen === subnetLen) {
+                    /*
+                     * push case 1)
+                     * If subnet mask length of child node and subnet mask length of node that will be pushed are same,
+                     * and if network address of child node and network address that will be pushed are same,
+                     * and if data of child node was not set,
+                     * then set the data as child node.
+                     *
+                     * push case 2)
+                     * If subnet msak length of child node and subnet mask length of node that will be pushed are same,
+                     * and there isn't child node as same network address,
+                     * then push the new node.
+                     */
+                    var netAddr4 = getBinaIPv4NetAddr(binIPv4, subnetLen);
+
+                    if(netAddr4 in node[I_IPV4_REF_CHILD_NODE]) {
+                        if(node[I_IPV4_REF_CHILD_NODE][netAddr4][I_IPV4_DATA]) {
+                            // The data is already existed in same indexed node.
+                            // TODO: show IPv4 string and subnet
+                            throw new Error("The data is already existed in tree with index ...");
+                        } else {
+                            // Update the already existed empty node.
+                            node[I_IPV4_REF_CHILD_NODE][netAddr4][I_IPV4_DATA] = data;
+                            /* return */
+                        }
+
+                    } else {
+                        // 
+                        node[I_IPV4_REF_CHILD_NODE][netAddr4]
+                                = createNewOneNode(data, subnetLen, undefined, {});
+                        /* return */
+                    }
+                } else if (childSubnetLen > subnetLen) {
+                    // If subnet length of node will be pushd longer than current child node,
+                    // then create a glue node with subnet length of node will be pushed.
+
+                    var newNode = {};
+                    for(var n4 in node[I_IPV4_REF_CHILD_NODE]) {
+                        // Archive child nodes
+                        var childNode = oneNode[I_IPV4_REF_CHILD_NODE][n4];
+                        newNode[n4] = childNode;
+                        delete node[I_IPV4_REF_CHILD_NODE][n4];
+                    }
+
+                    // Recalculate glue node's network address
+                    for(var oldN4 in newNode) {
+                        var newN4 = getBinIPv4NetAddr(binIPv4, subnetLen);
+                        node[I_IPV4_REF_CHILD_NODE][newN4]
+                                = createNewOneNode(undefined, subnetLen newNode[oldN4][I_IPV4_LENGTH_OF_SUBNETMASK], newNode);
+                        break;
+                    }
+
+                    // Update original child subnet mask length
+                    node[I_IPV4_REV_CHILD_NODE] = subnetLen;
+
+                    // 
+                    var insertNet4 = getBinIPv4NetAddr(binIPv4, subnetLen);
+                    if(insertNet4 in node[I_IPV4_REF_CHILD_NODE]) {
+                        myself.pushDataToIPv4Tree(
+                            node[I_IPV4_REF_CHILD_NODE][insertNet4], binIPv4, subnetLen, data);
+                        /* return */
+                    }
+                } else {    /* childSubnetLen < subnetLen */
+                    /*
+                     * Subnet mask length of node that will be pushed is longer than subnet mask length of child node,
+                     * then recalculate subnet mask length with length of child node.
+                     * As a result, if the result of re-calculate network address is equals to child node,
+                     * then the child node become a glue node of the node that will be pushed.
+                     * Else if a new empty node created as new become a glue node.
+                     */
+                     var netAddr4 = getBinIPv4NetAddr(binIPv4, node[I_IPV4_REF_CHILD_NODE]);
+                     if(netAddr4 in node[])
+                }
+            }
+        }
     }
 
     /**
      * Convert the IPv4 string to an unsignet 32bit integer.
-     * @param {string} ipv4
+     * @param {string} IPv4
      */
-    this.ipv4StringToBinary = function(ipv4) {
-        var rawIpv4     = 0;
-        var arrIpv4     = ipv4.split('.');
+    this.iPv4StringToBinary = function(iPv4) {
+        var binIPv4     = 0;
+        var arrIPv4     = iPv4.split('.');
         var tmpOctet    = 0;
 
-        if(arrIpv4.length != 4) {
+        if(arrIPv4.length != 4) {
             // TODO: Change error more adequate
-            throw new Error(ipv4 + " is not a valid IPv4 address format. It's format must be \"n.n.n.n\".");
+            throw new Error(iPv4 + " is not a valid IPv4 address format. It's format must be \"n.n.n.n\".");
         }
 
-        for(var i = 0; i < arrIpv4.length; ++i) {
-            rawIpv4 <<= 8;
-            tmpOctet = parseInt(arrIpv4[i]);
+        for(var i = 0; i < arrIPv4.length; ++i) {
+            binIPv4 <<= 8;
+            tmpOctet = parseInt(arrIPv4[i]);
             if(tmpOctet > 255 || tmpOctet < 0) {
                 // TODO: Change error more adequate
                 throw new Error(
-                    "Each octet must be greater or equal to 0 and less or equal 255(" + ipv4 + ").");
+                    "Each octet must be greater or equal to 0 and less or equal 255(" + iPv4 + ").");
             }
-            rawIpv4 += parseInt(arrIpv4[i]);
+            binIPv4 += parseInt(arrIPv4[i]);
         }
 
-        return rawIpv4;
+
+        return binIPv4;
     }
 
     /**
-     * Get network address from raw IPv4 address and length of subnetmask.
-     * @param {number} rawIpv4    Raw IPv4 address(not string IPv4 format)
+     * Get network address from binary IPv4 address and length of subnetmask.
+     * @param {number} binIPv4    binary IPv4 address(not string IPv4 format)
      * @param {number} subnetLen  Length of subnetmask
      */
-    this.getRawIPv4NetAddr = function(rawIpv4, subnetLen) {
-        return (ipv4NetMasks[subnetLen] & rawIpv4);
+    this.getBinIPv4NetAddr = function(binIPv4, subnetLen) {
+        return (iPv4NetMasks[subnetLen] & binIPv4);
+    }
+
+    /**
+     * Create a new node.
+     * @param {object} data            Data for node.
+     * @param {number} subnetLen       Length of subnet mask length of current node.
+     * @param {number} childSubnetLen  Length of subnet mask length of child node.
+     */
+    this.createNewOneNode = function(data, subnetLen, childSubnetLen, refToChild) {
+        var result = new Array(4);
+
+        result[I_IPV4_DATA]                         = data;
+        result[I_IPV4_LENGTH_OF_SUBNETMASK]         = subnetLen;
+        result[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]   = childSubnetLen;
+        result[I_IPV4_REF_CHILD_NODE]               = refToChild;
+
+        return result;
     }
 
 }

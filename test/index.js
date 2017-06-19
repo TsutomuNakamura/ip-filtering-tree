@@ -19,16 +19,18 @@ describe('ipdict', () => {
         it('should convert string of IPv4 to binary', () => {
             dict.iPv4StringToBinary('0.0.0.0').should.equal(0);
             // 255.255.255.255 -> 11111111 11111111 11111111 11111111 -> -1
-            //                    00000000 00000000 00000000 00000000 -> 0
             dict.iPv4StringToBinary('255.255.255.255').should.equal(-1);
+            // 255.255.255.0 -> 11111111 11111111 11111111 00000000 -> -256
             dict.iPv4StringToBinary('255.255.255.0').should.equal(-256);
+            // 255.255.0.0 -> 11111111 11111111 00000000 00000000 -> -65536
             dict.iPv4StringToBinary('255.255.0.0').should.equal(-65536);
+            // 255.0.0.0 -> 11111111 00000000 00000000 00000000 -> -16777216
             dict.iPv4StringToBinary('255.0.0.0').should.equal(-16777216);
             // 192.168.1.0     -> 11000000 10101000 00000001 00000000 -> -1062731520
-            //                    00111111 01010111 11111110 11111111 -> 1062731519
             dict.iPv4StringToBinary('192.168.1.0').should.equal(-1062731520);
+            // 192.168.1.0     -> 11000000 10101000 00000001 00000001 -> -1062731519
+            dict.iPv4StringToBinary('192.168.1.1').should.equal(-1062731519);
             // 172.16.0.0      -> 10101100 00010000 00000000 00000000 -> -1408237568
-            //                    01010011 11101111 11111111 11111111 -> 1408237567
             dict.iPv4StringToBinary('172.16.0.0').should.equal(-1408237568);
             // 10.0.0.0        -> 00001010 00000000 00000000 00000000 -> 167772160
             dict.iPv4StringToBinary('10.0.0.0').should.equal(167772160);
@@ -36,7 +38,9 @@ describe('ipdict', () => {
 
         it('should throws exception when the invalid format of IPv4 was specified.', () => {
             // TODO: exception when invalid format was detected.
-            
+            (() => { dict.iPv4StringToBinary('0.0.0.0.0'); }).should.throw(Error, '0.0.0.0.0 is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
+            (() => { dict.iPv4StringToBinary('0.0.0'); }).should.throw(Error, '0.0.0 is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
+            (() => { dict.iPv4StringToBinary('0.0.0.'); }).should.throw(Error);
         });
     });
 
@@ -130,6 +134,21 @@ describe('ipdict', () => {
 //        });
 
         it('should be able to push 2 node that has different subnet mask length order by 172.16.0.0/16 and 192.168.1.0/24', () => {
+//            +-------------------------+
+//            | 0.0.0.0/0               |
+//            +-+-----------------------+
+//              |
+//              +-----------------------------+
+//              |                             |
+//            +-+-----------------------+   +-+-----------------------+
+//            | 172.16.0.0/16           |   | 192.168.0.0/16          |
+//            +-------------------------+   +-+-----------------------+
+//                                            |
+//                                            |
+//                                            |
+//                                          +-+-----------------------+
+//                                          | 192.168.1.0/24          |
+//                                          +-+-----------------------+
             dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
             dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
 
@@ -140,11 +159,15 @@ describe('ipdict', () => {
             node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK].should.equal(16);
             Object.keys(node[I_IPV4_REF_CHILD_NODE]).length.should.equal(2);
 
-            // node 192.168.0.0/16 (glue node)
+            // node 192.168.0.0/16 (glue node) (11000000.10101000.00000000.00000000)
             node = node[I_IPV4_REF_CHILD_NODE][-1062731776];    // 192.168.0.0/16
             should.equal(node[I_IPV4_DATA], undefined);
-            node[I_IPV4_LENGTH_OF_SUBNETMASK].should.equal(0);
+            node[I_IPV4_LENGTH_OF_SUBNETMASK].should.equal(16);
 
+            // node 192.168.1.0/24 (real node) ()11000000.10101000.00000001.00000000
+            node = node[I_IPV4_REF_CHILD_NODE][-1062731520];    // 192.168.1.0/24
+            should.equal(node[I_IPV4_DATA], "Data of 192.168.1.0/24");
+            node[I_IPV4_LENGTH_OF_SUBNETMASK].should.equal(24);
         });
     });
 });

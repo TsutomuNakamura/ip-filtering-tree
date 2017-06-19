@@ -66,9 +66,10 @@ exports.IPDict = function() {
             /* return */
         } else {
             if(Object.keys(node[I_IPV4_REF_CHILD_NODE]).length === 0) {
-                console.log("DEBUG: in \"if(Object.keys(node[I_IPV4_REF_CHILD_NODE]).length === 0)\" ... "
-                        + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
-                        + ", Subnet len: " + subnetLen);      // TODO: debug
+                // console.log("DEBUG: in \"if(Object.keys(node[I_IPV4_REF_CHILD_NODE]).length === 0)\" ... "
+                //         + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
+                //         + ", Subnet len: " + subnetLen);      // TODO: debug
+                //
                 // Append the data into this node if this node didn't have any child nodes.
                 var netAddr4 = myself.getBinIPv4NetAddr(binIPv4, subnetLen);
                 node[I_IPV4_REF_CHILD_NODE][netAddr4]   = myself.createNewOneNode(data, subnetLen, undefined, {});
@@ -78,9 +79,9 @@ exports.IPDict = function() {
                 var childSubnetLen = node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
                 if(childSubnetLen === subnetLen) {
 
-                    console.log("DEBUG: in \"if(childSubnetLen === subnetLen)\" ... "
-                            + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
-                            + ", Subnet len: " + subnetLen);      // TODO: debug
+                    // console.log("DEBUG: in \"if(childSubnetLen === subnetLen)\" ... "
+                    //         + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
+                    //         + ", Subnet len: " + subnetLen);      // TODO: debug
 
                     /*
                      * push case 1)
@@ -114,9 +115,10 @@ exports.IPDict = function() {
                         /* return */
                     }
                 } else if (childSubnetLen > subnetLen) {
-                    console.log("DEBUG: in \"if (childSubnetLen > subnetLen)\" ... "
-                            + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
-                            + ", Subnet len: " + subnetLen);      // TODO: debug
+                    //console.log("DEBUG: in \"if (childSubnetLen > subnetLen)\" ... "
+                    //        + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
+                    //        + ", Subnet len: " + subnetLen);      // TODO: debug
+
                     // If subnet length of node will be pushd longer than current child node,
                     // then create a glue node with subnet length of node will be pushed.
 
@@ -150,10 +152,11 @@ exports.IPDict = function() {
                                 = createNewOneNode(data, subnetLen, undefined, {});
                     }
                 } else {    /* childSubnetLen < subnetLen */
-                    console.log("DEBUG: in \"if (childSubnetLen < subnetLen)\" ... "
-                            + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
-                            + ", Subnet len: " + subnetLen
-                            + ", Child subnet len: " + childSubnetLen);      // TODO: debug
+                    // TODO:
+                    // console.log("DEBUG: in \"if (childSubnetLen < subnetLen)\" ... "
+                    //         + "IPv4: " + myself.stringifyFromBinIPv4(binIPv4)
+                    //         + ", Subnet len: " + subnetLen
+                    //         + ", Child subnet len: " + childSubnetLen);      // TODO: debug
                     /*
                      * Subnet mask length of node that will be pushed is longer than subnet mask length of child node,
                      * then recalculate subnet mask length with length of child node.
@@ -163,11 +166,11 @@ exports.IPDict = function() {
                      */
                     var netAddr4 = myself.getBinIPv4NetAddr(binIPv4, node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
                     if(netAddr4 in node[I_IPV4_REF_CHILD_NODE]) {
-                        console.log("DEBUG: \"if(netAddr4 in node[I_IPV4_REF_CHILD_NODE])\"");    // TODO: debug
+                        // console.log("DEBUG: \"if(netAddr4 in node[I_IPV4_REF_CHILD_NODE])\"");    // TODO: debug
                         pushDataToIPv4Tree(node[I_IPV4_REF_CHILD_NODE][netAddr4], binIPv4, subnetLen, data);
                         /* return */
                     } else {
-                        console.log("DEBUG: \"if(netAddr4 NOT in node[I_IPV4_REF_CHILD_NODE])\"");    // TODO: debug
+                        // console.log("DEBUG: \"if(netAddr4 NOT in node[I_IPV4_REF_CHILD_NODE])\"");    // TODO: debug
                         var newNet4 = myself.getBinIPv4NetAddr(binIPv4, subnetLen);
                         var glueNode
                                 = node[I_IPV4_REF_CHILD_NODE][netAddr4]

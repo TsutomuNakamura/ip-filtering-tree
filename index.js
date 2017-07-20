@@ -70,7 +70,7 @@ exports.IPDict = function() {
             //         ", I_IPV4_LENGTH_OF_CHILD_SUBNETMASK="  + currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
 
             if(subnetLengthOfCurrentNode === subnetLength) {
-                console.log("# DEBUG: # section 1 ############################################");
+                // console.log("# DEBUG: # section 1 ############################################");  /* DEBUG: */
                 // The data may have been existed
                 if(currentNode[I_IPV4_DATA] !== undefined) {
                     // The data have been existed!
@@ -90,7 +90,7 @@ exports.IPDict = function() {
                 // console.log(currentNode[I_IPV4_REF_CHILD_NODE]);
                 if(Object.keys(currentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {
 
-                    console.log("# DEBUG: # section 2 ############################################");
+                    // console.log("# DEBUG: # section 2 ############################################");  /* DEBUG: */
 
                     // Append the data as a child node
                     // console.log("DEBUG: Append the data from -> I_IPV4_DATA=" + currentNode[I_IPV4_DATA] + 
@@ -109,7 +109,7 @@ exports.IPDict = function() {
 
                 if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] > subnetLength) {
 
-                    console.log("# DEBUG: # section 3 ############################################");
+                    // console.log("# DEBUG: # section 3 ############################################");  /* DEBUG: */
                     // insert and create glue node for existing node as needed
                     // #########################################################
                     // Create glue node then check the glue node's network address.
@@ -123,7 +123,7 @@ exports.IPDict = function() {
                     }
                     // TODO: continue
                 } else if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] < subnetLength) {
-                    console.log("# DEBUG: # section 4 ############################################");
+                    // console.log("# DEBUG: # section 4 ############################################");  /* DEBUG: */
 
                     // continue then new node will be appended
                     var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
@@ -138,7 +138,7 @@ exports.IPDict = function() {
                     // console.log("currentNode after pushed: ");
                     // console.log(currentNode);
                 } else {
-                    console.log("# DEBUG: # section 5 ############################################");
+                    // console.log("# DEBUG: # section 5 ############################################");  /* DEBUG: */
                     /* currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === subnetLength */
                     if(!currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4]) {
                         currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4] = myself.createNewOneNode(undefined, subnetLength, undefined, {});

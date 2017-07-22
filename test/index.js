@@ -437,7 +437,7 @@ describe('ipdict', () => {
         it('should be able to push nodes 192.168.1.0/24, 192.168.0.0/16, 192.0.0.0/8', () => {
             /*
                 +-------------------------+
-                | 0.0.0.0/0(g)            |
+                | 0.0.0.0/0(d)            |
                 +-+-----------------------+
                   |
                 +-+-----------------------+
@@ -452,6 +452,19 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.pushDataForIPv4("192.0.0.0", 8, "Data of 192.0.0.0/8");
+
+            var node = dict.getBinTree4()[0];
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node, "Data of 192.0.0.0/8", 8, 16, ['192.168.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, ['192.168.1.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.0.0.0/8, 192.168.0.0/16', () => {
@@ -472,9 +485,22 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.0.0.0", 8, "Data of 192.0.0.0/8");
+            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
+
+            var node = dict.getBinTree4()[0];
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node, "Data of 192.0.0.0/8", 8, 16, ['192.168.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, ['192.168.1.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, undefined, []);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 192.168.1.0/24, 172.16.0.0/16', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -490,9 +516,36 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+
+            var node = dict.getBinTree4()[0];
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '172.16.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
-        it('TODO', () => {
+        function assertSetType3(dict) {
+            var node = dict.getBinTree4()[0];
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '192.169.0.0', '172.16.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.169.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
+        }
+
+
+        it('should be able to push nodes 192.168.1.0/24, 192.169.1.0/24, 172.16.0.0/16', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -508,9 +561,13 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 2) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            assertSetType3(dict);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 192.168.1.0/24, 172.16.0.0/16, 192.169.1.0/24', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -526,9 +583,36 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            assertSetType3(dict);
         });
 
-        it('TODO', () => {
+        function assertSetType5(dict) {
+            var node = dict.getBinTree4()[0];
+            assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node1, undefined, 8, 16, ['192.168.0.0', '192.169.0.0']);
+            var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node2, undefined, 16, 24, ['192.168.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node2, "Data of 192.169.0.0/16", 16, 24, ['192.169.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
+        }
+
+        it('should be able to push nodes 192.168.1.0/24, 192.168.1.0/24, 172.16.0.0/16, 10.0.0.0/8, 192.169.0.0/16', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -540,19 +624,25 @@ describe('ipdict', () => {
                 | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 4)10.0.0.0/8(d)         |
                 +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
                   |                                                       |
-                  +---------------------------                            |
-                  | Create a glue node        | Create a glue node        |
+                  +---------------------------+ Create a glue node        |
+                  | Create a glue node        | then update it            |
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 3)172.16.0.0/16(d)      |
+                | 192.168.0.0/16(g)       | | 5)192.169.0.0/16(d)     | | 3)172.16.0.0/16(d)      |
                 +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 1) 192.168.1.0/24(d)    | | 2) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            assertSetType5(dict);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 192.168.1.0/24, 172.16.0.0/16, 192.169.0.0/16, 192.168.1.0/24, 10.0.0.0/8', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -561,22 +651,28 @@ describe('ipdict', () => {
                   +-------------------------------------------------------+---------------------------+
                   | Create a glue node                                    | Create a glue node        |
                 +-------------------------+                             +-+-----------------------+ +-+-----------------------+
-                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 4)10.0.0.0/8(d)         |
+                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 5)10.0.0.0/8(d)         |
                 +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
                   |                                                       |
-                  +---------------------------+                           |
-                  | Create a glue node        | Create a glue node        |
+                  +---------------------------+ Create a data node        |
+                  | Create a glue node        | then push a data node     |
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 2)172.16.0.0/16(d)      |
+                | 192.168.0.0/16(g)       | | 3) 192.169.0.0/16(g)    | | 2)172.16.0.0/16(d)      |
                 +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
-                | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
+                | 1) 192.168.1.0/24(d)    | | 4) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            assertSetType5(dict);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 192.168.1.0/24, 172.16.0.0/16, 192.169.0.0/16, 192.168.1.0/24, 10.0.0.0/8', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -585,22 +681,28 @@ describe('ipdict', () => {
                   +-------------------------------------------------------+---------------------------+
                   | Create a glue node                                    | Create a glue node        |
                 +-------------------------+                             +-+-----------------------+ +-+-----------------------+
-                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 4)10.0.0.0/8(d)         |
+                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 5)10.0.0.0/8(d)         |
                 +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
                   |                                                       |
-                  +---------------------------+                           |
-                  | Create a glue node        | Create a glue node        |
+                  +---------------------------+ Create a glue node        |
+                  | Create a glue node        | then update it            |
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 2)172.16.0.0/16(d)      |
+                | 192.168.0.0/16(g)       | | 4)192.169.0.0/16(g)     | | 2)172.16.0.0/16(d)      |
                 +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            assertSetType5(dict);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24, 192.169.0.0/16, 192.168.1.0/24', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -615,16 +717,22 @@ describe('ipdict', () => {
                   +---------------------------+                           |
                   | Create a glue node        | Create a glue node        |
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 2)172.16.0.0/16(d)      |
+                | 192.168.0.0/16(g)       | | 4)192.169.0.0/16(g)       | | 2)172.16.0.0/16(d)      |
                 +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
-                | 4) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
+                | 5) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            assertSetType5(dict);
         });
 
-        it('TODO', () => {
+        it('should be able to push nodes 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24, 192.169.0.0/16, 192.168.1.0/24' , () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(g)            |
@@ -639,13 +747,19 @@ describe('ipdict', () => {
                   +---------------------------+                           |
                   | Create a glue node        | Create a glue node        |
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 3)172.16.0.0/16(d)      |
+                | 192.168.0.0/16(g)       | | 4)192.169.0.0/16(g)     | | 3)172.16.0.0/16(d)      |
                 +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
-                | 2) 192.168.1.0/24(d)    | | 4) 192.169.1.0/24(d)    |
+                | 2) 192.168.1.0/24(d)    | | 5) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            assertSetType5(dict);
         });
     });
 
@@ -674,7 +788,6 @@ describe('ipdict', () => {
                 | 192.168.1.0/24(d)       |
                 +-------------------------+
             */
-            // FIXME: 
             dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
             var node = dict.getBinTree4()[0];

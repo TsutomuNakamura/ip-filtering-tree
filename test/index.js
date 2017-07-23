@@ -7,13 +7,18 @@ describe('ipdict', () => {
 
     const I_IPV4_DATA                       = 0;
     const I_IPV4_LENGTH_OF_SUBNETMASK       = 1;
-    const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 2;
-    const I_IPV4_REF_CHILD_NODE             = 3;
+    const I_IPV4_IS_GLUE_NODE               = 2;
+    const I_IPV4_CHILD_ELEMENTS             = 3;
 
-    function assertTheNode(node, data, subnetLength, subnetLengthOfChild, indexesOfChildNodes) {
+    const I_CHILD_SUBNET_LENGTH             = 0;
+    const I_CHILD_NODES                     = 1;
+
+    function assertTheNode(node, data, subnetLength, isGlueNode, subnetLengthOfChild, indexesOfChildNodes) {
         should.equal(node[I_IPV4_DATA], data);
         should.equal(node[I_IPV4_LENGTH_OF_SUBNETMASK], subnetLength);
-        should.equal(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], subnetLengthOfChild);
+        should.equal(node[I_IPV4_IS_GLUE_NODE], isGlueNode);
+        should.equal(node[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH], subnetLengthOfChild);
+
         should.equal(Object.keys(node[I_IPV4_REF_CHILD_NODE]).length, indexesOfChildNodes.length);
         for(var i = 0; i < indexesOfChildNodes.length; ++i) {
             should.exist(node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary(indexesOfChildNodes[i])]);
@@ -76,10 +81,10 @@ describe('ipdict', () => {
 
     describe('#createNewOneNode', function() {
         it('should create a new node with specified parameters', () => {
-            var result = dict.createNewOneNode({a: 0}, -256, 24, {b: 1});
+            var result = dict.createNewOneNode({a: 0}, 16, false, 24, {b: 1});
 
             result[I_IPV4_DATA].a.should.equal(0);
-            result[I_IPV4_LENGTH_OF_SUBNETMASK].should.equal(-256);
+            result[I_IPV4_LENGTH_OF_SUBNETMASK].should.equa1l(16);
             result[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK].should.equal(24);
             result[I_IPV4_REF_CHILD_NODE].b.should.equal(1);
         });
@@ -760,6 +765,110 @@ describe('ipdict', () => {
             dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
             dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
             assertSetType5(dict);
+        });
+    });
+
+    describe('#remove', () => {
+        beforeEach(() => {
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+        });
+
+        function createTree01() {
+             /*
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +-------------------------------------------------------+---------------------------+
+                  | Create a glue node                                    | Create a glue node        |
+                +-------------------------+                             +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 1)10.0.0.0/8(d)         |
+                +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
+                  |                                                       |
+                  +---------------------------+                           |
+                  | Create a glue node        | Create a glue node        |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 4)192.169.0.0/16(g)     | | 3)172.16.0.0/16(d)      |
+                +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 2) 192.168.1.0/24(d)    | | 5) 192.169.1.0/24(d)    |
+                +-------------------------+ +-------------------------+
+            */
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+        }
+
+        it('should remove a single data node', () => {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                +-+-----------------------+
+                | 10.0.0.0/8(d)           |
+                +-------------------------+
+
+                > below >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-------------------------+
+            */
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.remove();
+        });
+    });
+
+    describe('#find', () => {
+        it('should return undefined if no data has been registered', () => {
+            should.not.exist(dict.find("0.0.0.0"));
+            should.not.exist(dict.find("192.168.1.10"));
+            should.not.exist(dict.find("172.16.0.1"));
+        });
+
+        it('should return data if data has been registered in key 0.0.0.0/0', () => {
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
+            dict.find("10.0.0.1").should.equal("Data of 0.0.0.0/0");
+            dict.find("172.16.0.1").should.equal("Data of 0.0.0.0/0");
+            dict.find("192.168.1.1").should.equal("Data of 0.0.0.0/0");
+        });
+
+        it('should return data for 0.0.0.0/0, 192.168.1.0/24', () => {
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
+            dict.find("10.0.0.1").should.equal("Data of 0.0.0.0/0");
+            dict.find("172.16.0.1").should.equal("Data of 0.0.0.0/0");
+            dict.find("192.168.1.1").should.equal("Data of 192.168.1.0/24");
+        });
+
+        it('should return data for 0.0.0.0/0, 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24', () => {
+            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.pushDataForIPv4("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
+            dict.find("10.0.0.1").should.equal("Data of 10.0.0.0/8");
+            dict.find("172.16.0.1").should.equal("Data of 172.16.0.0/16");
+            dict.find("192.168.1.1").should.equal("Data of 192.168.1.0/24");
+        });
+        it('should return undefined(data of 0.0.0.0/0) if data which appropriate is not found', () => {
+            dict.pushDataForIPv4("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.pushDataForIPv4("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            should.not.exist(dict.find("0.0.0.0"));
+            should.not.exist(dict.find("11.0.0.1"));
+            should.not.exist(dict.find("172.17.0.1"));
+            should.not.exist(dict.find("192.168.2.1"));
         });
     });
 

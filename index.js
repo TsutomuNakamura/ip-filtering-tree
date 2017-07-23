@@ -24,7 +24,6 @@ exports.IPDict = function() {
     iPv4Dict[0] = [         /* Network address */
         undefined,          /* Data */
         0,                  /* Length of subnetmask */
-        undefined,          /* Length of child node's subnet mask */
         true,               /* Is glue node? */
         [undefined, {}]     /* Next node ['Length of child subnetmask', 'child nodes map'] */
     ];
@@ -164,6 +163,7 @@ exports.IPDict = function() {
 
                 // Override the data in this glue node.
                 currentNode[I_IPV4_DATA] = data;
+                currentNode[I_IPV4_IS_GLUE_NODE] = false;
                 // return;    // TODO:
                 break;      // TODO:
             } else if(subnetLengthOfCurrentNode < subnetLength) {
@@ -184,15 +184,14 @@ exports.IPDict = function() {
                     // console.log("DEBUG:                   to -> I_IPV4_DATA=" + binaryIPv4);
 
                     // Append the node under the current node
-                    currentNode[I_IPV4_REF_CHILD_NODE][networkAddress]  = myself.createNewOneNode(data, subnetLength, false, undefined, {});
-                    // console.log("DEBUG: ---------------> ");
-                    // console.log(currentNode[I_IPV4_REF_CHILD_NODE][networkAddress]);
-                    currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]      = subnetLength;
+                    // FIXME: createNewChildElement()
+                    currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][networkAddress]  = myself.createNewOneNode(data, subnetLength, false, undefined, {});
+                    currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]      = subnetLength;
 
                     break;
                 }
 
-                if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] > subnetLength) {
+                if(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH] > subnetLength) {
 
                     // console.log("# DEBUG: # section 3 ############################################");  /* DEBUG: */
                     // insert and create glue node for existing node as needed
@@ -202,34 +201,32 @@ exports.IPDict = function() {
                     //   If not match: insert the node then break
                     myself.createGlueNodes(currentNode, subnetLength);
 
-                    if(!(networkAddress in currentNode[I_IPV4_REF_CHILD_NODE])) {
-                        currentNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(data, subnetLength, false, undefined, {});
+                    if(!(networkAddress in currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES])) {
+                        currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][networkAddress] = myself.createNewOneNode(data, subnetLength, false, undefined, {});
                         break;
                     }
                     // TODO: continue
-                } else if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] < subnetLength) {
+                } else if(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH] < subnetLength) {
                     // console.log("# DEBUG: # section 4 ############################################");  /* DEBUG: */
 
                     // continue then new node will be appended
-                    var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
+                    var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]);
 
                     // console.log("Child network address -- " + myself.stringifyFromBinIPv4(childNetworkAddress));    // TODO:
-                    if(currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress] === undefined) {
-                        currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress]
-                                = myself.createNewOneNode(undefined, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], true, undefined, {});
+                    if(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][childNetworkAddress] === undefined) {
+                        currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][childNetworkAddress]
+                                = myself.createNewOneNode(undefined, currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES], true, undefined, {});
                     }
-                    // console.log("currentNode before pushed: ");
-                    // console.log(currentNode);
-                    currentNode = currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress];    /* continue */
-                    // console.log("currentNode after pushed: ");
-                    // console.log(currentNode);
+                    currentNode = currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][childNetworkAddress];
+                    // TODO: continue
                 } else {
                     // console.log("# DEBUG: # section 5 ############################################");  /* DEBUG: */
                     /* currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === subnetLength */
-                    if(!currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4]) {
-                        currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4] = myself.createNewOneNode(undefined, subnetLength, true, undefined, {});
+                    if(!currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][binaryIPv4]) {
+                        currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][binaryIPv4]
+                                = myself.createNewOneNode(undefined, subnetLength, true, undefined, {});
                     }
-                    currentNode = currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4];    /* continue */
+                    currentNode = currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][binaryIPv4];    /* continue */
                 }
             } else {
                 // no way
@@ -337,7 +334,7 @@ exports.IPDict = function() {
     }
 
     this.createGlueNodes = function (node, subnetLength){
-        var childNodes = node[I_IPV4_REF_CHILD_NODE];
+        var childNodes = node[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES];
         var rootOfGlueNodes = {};
 
         // subnetLength < node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]
@@ -348,14 +345,15 @@ exports.IPDict = function() {
 
             if(!(netAddress in rootOfGlueNodes)) {
                 rootOfGlueNodes[netAddress]
-                        = myself.createNewOneNode(undefined, subnetLength, true, node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], {});
+                        = myself.createNewOneNode(undefined, subnetLength, true, node[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH], {});
             }
             var glueNode = rootOfGlueNodes[netAddress];
-            glueNode[I_IPV4_REF_CHILD_NODE][key] = childNodes[key];
+            glueNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][key] = childNodes[key];
         }
 
-        node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = subnetLength;
-        node[I_IPV4_REF_CHILD_NODE] = rootOfGlueNodes;
+        // FIXME: atomicity
+        node[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]  = subnetLength;
+        node[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]          = rootOfGlueNodes;
     }
 }
 

@@ -97,10 +97,6 @@ exports.IPDict = function() {
         }
     }
 
-    this.hasGlueNodeOnly = function(node) {
-        console.log("TODO: ");
-    }
-
     this.find = function(keyIP) {
         var ip              = myself.iPv4StringToBinary(keyIP, 32);
         var netAddr         = undefined;    /* should 0.0.0.0 at first time */
@@ -108,9 +104,9 @@ exports.IPDict = function() {
         var nextNode        = undefined;
         var result          = currentNode[I_IPV4_DATA];
 
-        while(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]) {
-            netAddr = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
-            if(nextNode = currentNode[I_IPV4_REF_CHILD_NODE][netAddr]) {
+        while(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH] !== undefined) {
+            netAddr = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]);
+            if(nextNode = currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][netAddr]) {
                 // found data node or glue node
                 if(!nextNode[I_IPV4_IS_GLUE_NODE]) {
                     result = nextNode[I_IPV4_DATA];
@@ -150,7 +146,7 @@ exports.IPDict = function() {
             var subnetLengthOfCurrentNode = currentNode[I_IPV4_LENGTH_OF_SUBNETMASK];
 
             if(subnetLengthOfCurrentNode === subnetLength) {
-                console.log("# DEBUG: # section 1 ############################################");  /* DEBUG: */
+                // console.log("# DEBUG: # section 1 ############################################");  /* DEBUG: */
 
                 // The data may have been existed
                 if(currentNode[I_IPV4_DATA] !== undefined) {
@@ -168,7 +164,7 @@ exports.IPDict = function() {
 
                 if(Object.keys(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]).length === 0) {
 
-                    console.log("# DEBUG: # section 2 ############################################");  /* DEBUG: */
+                    // console.log("# DEBUG: # section 2 ############################################");  /* DEBUG: */
 
                     // FIXME: createNewChildElement()
                     currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][networkAddress]  = myself.createNewOneNode(data, subnetLength, false, undefined, {});
@@ -179,7 +175,7 @@ exports.IPDict = function() {
 
                 if(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH] > subnetLength) {
 
-                    console.log("# DEBUG: # section 3 ############################################");  /* DEBUG: */
+                    // console.log("# DEBUG: # section 3 ############################################");  /* DEBUG: */
                     // insert and create glue node for existing node as needed
                     // #########################################################
                     // Create glue node then check the glue node's network address.
@@ -192,18 +188,18 @@ exports.IPDict = function() {
                         currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][networkAddress] = myself.createNewOneNode(data, subnetLength, false, undefined, {});
 
                         // TODO: debug
-                        myself.dumpTree(currentNode);
+                        //myself.dumpTree(currentNode);
 
                         break;
                     }
 
                     // TODO: debug
-                    console.log("-- continue");
-                    myself.dumpTree(currentNode);
+                    //console.log("-- continue");
+                    //myself.dumpTree(currentNode);
 
                     // TODO: continue
                 } else if(currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH] < subnetLength) {
-                    console.log("# DEBUG: # section 4 ############################################");  /* DEBUG: */
+                    // console.log("# DEBUG: # section 4 ############################################");  /* DEBUG: */
 
                     // continue then new node will be appended
                     var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]);
@@ -214,13 +210,13 @@ exports.IPDict = function() {
                                 = myself.createNewOneNode(undefined, currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH], true, undefined, {});
                     }
                     // TODO: debug
-                    myself.dumpTree(currentNode);  // FIXME: ???
+                    //myself.dumpTree(currentNode);  // FIXME: ???
 
                     currentNode = currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][childNetworkAddress];
 
                     // TODO: continue
                 } else {
-                    console.log("# DEBUG: # section 5 ############################################");  /* DEBUG: */
+                    // console.log("# DEBUG: # section 5 ############################################");  /* DEBUG: */
                     /* currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === subnetLength */
                     if(!currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][binaryIPv4]) {
                         currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][binaryIPv4]
@@ -343,22 +339,14 @@ exports.IPDict = function() {
             if(!(netAddress in rootOfGlueNodes)) {
                 rootOfGlueNodes[netAddress]
                         = myself.createNewOneNode(undefined, subnetLength, true, node[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH], {});
-
-                // FIXME: ???
-                // rootOfGlueNodes[netAddress]
-                //         = myself.createNewOneNode(undefined, subnetLength, true, subnetLength, {});
             }
             var glueNode = rootOfGlueNodes[netAddress];
             glueNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES][key] = childNodes[key];
         }
 
-        // FIXME: atomicity
+        // FIXME: should be atomicity
         node[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH]  = subnetLength;
         node[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]          = rootOfGlueNodes;
-
-        // TODO:
-        console.log("-- After create glue -------------------------------");
-        myself.dumpTree(node);
     }
 
     this.dumpTree = function(node, maxdepth = -1) {

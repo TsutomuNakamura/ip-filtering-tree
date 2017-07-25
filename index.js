@@ -68,12 +68,19 @@ exports.IPDict = function() {
                     // remove and return the data
                     // TODO:
                     result = currentNode[I_IPV4_DATA];
-                    if(Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length === 1) {
-                        var map = currentNode[I_IPV4_REF_CHILD_NODE];
-                        var childSubnetLength = currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
-                        // 
+                    if(Object.keys(parentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]).length === 1) {
+                        parentNode[I_IPV4_CHILD_ELEMENTS] = myself.createNewChildElement(
+                                                                currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_SUBNET_LENGTH],
+                                                                currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]);
+                        // TODO: delete current node?
                     } else {
-                    
+                        var deleted = createNewOneNode(
+                                            undefined,
+                                            currentNode[I_IPV4_LENGTH_OF_SUBNETMASK],
+                                            true,
+                                            currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES],
+                                            currentNode[I_IPV4_CHILD_ELEMENTS][I_CHILD_NODES]);
+                        currentNode[I_IPV4_DATA];
                     }
                     return result;
                 }

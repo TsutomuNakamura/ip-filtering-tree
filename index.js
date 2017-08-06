@@ -114,6 +114,10 @@ exports.IPDict = function() {
                     delete parentNode[I_IPV4_REF_CHILD_NODE][netAddr];
                     if(Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {
                         parentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = undefined;
+                        if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] !== undefined) {
+                            parentNode[I_IPV4_REF_CHILD_NODE]               = currentNode[I_IPV4_REF_CHILD_NODE];
+                            parentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]   = currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
+                        }
                     }
 
                     //if(parentNode[I_IPV4_IS_GLUE_NODE] === false) {
@@ -205,7 +209,7 @@ exports.IPDict = function() {
      * @param {number} len   Length of network address for IPv4 address
      * @param {object} data  Data for push
      */
-    this.pushDataForIPv4 = function(iPv4, len, data) {
+    this.push = function(iPv4, len, data) {
         if(data === undefined) {
             throw Error("Cannot push undefined to the tree");
         }

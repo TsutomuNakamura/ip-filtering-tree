@@ -11,11 +11,6 @@ describe('ipdict', () => {
     const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 3;
     const I_IPV4_REF_CHILD_NODE             = 4;
 
-//    const I_IPV4_CHILD_ELEMENTS             = 3;
-//
-//    const I_CHILD_SUBNET_LENGTH             = 0;
-//    const I_CHILD_NODES                     = 1;
-
     function assertTheNode(node, data, subnetLength, isGlueNode, subnetLengthOfChild, indexesOfChildNodes) {
         should.equal(node[I_IPV4_DATA], data);
         should.equal(node[I_IPV4_LENGTH_OF_SUBNETMASK], subnetLength);
@@ -108,7 +103,7 @@ describe('ipdict', () => {
         });
     });
 
-    describe('#pushDataForIPv4', () => {
+    describe('#push', () => {
 
         /*
             (g): glue node
@@ -129,13 +124,17 @@ describe('ipdict', () => {
             Object.keys(node[I_IPV4_REF_CHILD_NODE]).length.should.equal(0);
         });
 
+        it('should not be able to push undefined data', () => {
+            (() => {dict.push("0.0.0.0", 0, undefined)}).should.throw(Error, "Cannot push undefined to the tree");
+        });
+
         it('should be able to push a root node 0.0.0.0/0', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
         });
@@ -150,7 +149,7 @@ describe('ipdict', () => {
                 | 1)128.0.0.0/1(d)        |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("128.0.0.0", 1, "Data of 128.0.0.0/1");
+            dict.push("128.0.0.0", 1, "Data of 128.0.0.0/1");
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 1, ['128.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('128.0.0.0')];
@@ -170,8 +169,8 @@ describe('ipdict', () => {
                 | 1)128.0.0.0/1(d)        | | 2)0.0.0.0/1(d)          |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("128.0.0.0", 1, "Data of 128.0.0.0/1");
-            dict.pushDataForIPv4("0.0.0.0", 1, "Data of 0.0.0.0/1");
+            dict.push("128.0.0.0", 1, "Data of 128.0.0.0/1");
+            dict.push("0.0.0.0", 1, "Data of 0.0.0.0/1");
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 1, ['128.0.0.0', '0.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('128.0.0.0')];
@@ -190,7 +189,7 @@ describe('ipdict', () => {
                 | 1)255.255.255.255/32(d) |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("255.255.255.255", 32, "Data of 255.255.255.255/32");
+            dict.push("255.255.255.255", 32, "Data of 255.255.255.255/32");
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 32, ['255.255.255.255']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.255.255')];
@@ -209,8 +208,8 @@ describe('ipdict', () => {
                 | 1)255.255.255.255/32(d) | | 2)255.255.255.254/32(d) |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("255.255.255.255", 32, "Data of 255.255.255.255/32");
-            dict.pushDataForIPv4("255.255.255.254", 32, "Data of 255.255.255.254/32");
+            dict.push("255.255.255.255", 32, "Data of 255.255.255.255/32");
+            dict.push("255.255.255.254", 32, "Data of 255.255.255.254/32");
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 32, ['255.255.255.255', '255.255.255.254']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.255.255')];
@@ -229,7 +228,7 @@ describe('ipdict', () => {
                 | 1)192.168.1.0/24(d)     |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][-1062731520];    // -1062731520 -> 192.168.0.1
@@ -248,9 +247,9 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 2) 192.168.2.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 24, ['192.168.1.0', '192.168.2.0']);
@@ -275,9 +274,9 @@ describe('ipdict', () => {
                 | 2) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
 
             var node1 = dict.getRootNode();
             assertTheNode(node1, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
@@ -303,10 +302,10 @@ describe('ipdict', () => {
                 | 2) 192.168.1.0/24(d)    | | 3) 192.168.2.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
@@ -334,10 +333,10 @@ describe('ipdict', () => {
                 | 2) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0', '172.16.0.0']);
@@ -363,9 +362,9 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
@@ -391,10 +390,10 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 3) 192.168.2.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.2.0", 24, "Data of 192.168.2.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
@@ -422,10 +421,10 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0', '172.16.0.0']);
@@ -456,10 +455,10 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("192.0.0.0", 8, "Data of 192.0.0.0/8");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("192.0.0.0", 8, "Data of 192.0.0.0/8");
 
             var node = dict.getRootNode();
             assertTheNode(node, "Data of 0.0.0.0/0", 0, false, 8, ['192.0.0.0']);
@@ -489,10 +488,10 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.0.0.0", 8, "Data of 192.0.0.0/8");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.0.0.0", 8, "Data of 192.0.0.0/8");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, "Data of 0.0.0.0/0", 0, false, 8, ['192.0.0.0']);
@@ -520,8 +519,8 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, true, 16, ['192.168.0.0', '172.16.0.0']);
@@ -565,9 +564,9 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 2) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.169.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
             assertSetType3(dict);
         });
 
@@ -587,9 +586,9 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             assertSetType3(dict);
         });
 
@@ -638,11 +637,11 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 2) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
             assertSetType5(dict);
         });
 
@@ -668,11 +667,11 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 4) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             assertSetType5(dict);
         });
 
@@ -698,11 +697,11 @@ describe('ipdict', () => {
                 | 1) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             assertSetType5(dict);
         });
 
@@ -728,11 +727,11 @@ describe('ipdict', () => {
                 | 5) 192.168.1.0/24(d)    | | 3) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             assertSetType5(dict);
         });
 
@@ -758,11 +757,11 @@ describe('ipdict', () => {
                 | 2) 192.168.1.0/24(d)    | | 5) 192.169.1.0/24(d)    |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
             assertSetType5(dict);
         });
     });
@@ -790,12 +789,12 @@ describe('ipdict', () => {
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 8, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.pushDataForIPv4("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.pushDataForIPv4("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 8, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
+            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
         }
 
         it('should delete a root data node', () => {
@@ -808,7 +807,7 @@ describe('ipdict', () => {
                 | 0.0.0.0/0(g)            |
                 +-------------------------+
             */
-            dict.pushDataForIPv4('0.0.0.0', 0, "Data of 0.0.0.0/0");
+            dict.push('0.0.0.0', 0, "Data of 0.0.0.0/0");
             dict.delete("0.0.0.0", 0).should.equal("Data of 0.0.0.0/0");;
 
             var node = dict.getRootNode();
@@ -829,11 +828,9 @@ describe('ipdict', () => {
                 | 0.0.0.0/0(d)            |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");
-            // var a = dict.delete("10.0.0.0", 8);
-            // console.log("- " + a + " ----------------------------------------------------");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
@@ -858,24 +855,22 @@ describe('ipdict', () => {
                 | 255.255.128./17(d)      |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");
-            // var a = dict.delete("10.0.0.0", 8);
-            // console.log("- " + a + " ----------------------------------------------------");
 
             var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
         });
 
-        it('TODO', () => {
+        it('should delete subnet the data that has length of subnetmask 18', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
                 +-+-----------------------+
                   |
                 +-+-----------------------+
-                | 255.255.128./17(d)      |
+                | 255.255.128.0/17(d)     |
                 +-+-----------------------+
                   | delete
                 +-+-----------------------+
@@ -887,9 +882,18 @@ describe('ipdict', () => {
                 +-+-----------------------+
                   |
                 +-+-----------------------+
-                | 255.255.128./17(d)      |
+                | 255.255.128.0/17(d)     |
                 +-------------------------+
             */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("255.255.128.0", 17, "Data of 255.255.128.0/17");
+            dict.push("255.255.192.0", 18, "Data of 255.255.192.0/18");
+            dict.delete("255.255.192.0", 18).should.equal("Data of 255.255.192.0/18");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['255.255.128.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.128.0')];
+            assertTheNode(node, 'Data of 255.255.128.0/17', 17, false, undefined, []);
         });
 
         it('TODO', () => {
@@ -914,6 +918,15 @@ describe('ipdict', () => {
                 | 255.255.192.0/18(d)     |
                 +-------------------------+
             */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("255.255.128.0", 17, "Data of 255.255.128.0/17");
+            dict.push("255.255.192.0", 18, "Data of 255.255.192.0/18");
+            dict.delete("255.255.128.0", 17).should.equal("Data of 255.255.128.0/17");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 18, ['255.255.192.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.192.0')];
+            assertTheNode(node, 'Data of 255.255.192.0/18', 18, false, undefined, []);
         });
 
         it('should delete a sinble data node middle of data node', () => {
@@ -1014,9 +1027,9 @@ describe('ipdict', () => {
                 | 172.16.0.0/16(d)        |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");;
 
            var node = dict.getRootNode();
@@ -1154,7 +1167,7 @@ describe('ipdict', () => {
 
     describe('#find', () => {
         it('find', () => {
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
         });
 
@@ -1166,7 +1179,7 @@ describe('ipdict', () => {
         });
 
         it('should return data if data has been registered in key 0.0.0.0/0', () => {
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
             dict.find("10.0.0.1").should.equal("Data of 0.0.0.0/0");
             dict.find("172.16.0.1").should.equal("Data of 0.0.0.0/0");
@@ -1174,8 +1187,8 @@ describe('ipdict', () => {
         });
 
         it('should return data for 0.0.0.0/0, 192.168.1.0/24', () => {
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
             dict.find("10.0.0.1").should.equal("Data of 0.0.0.0/0");
             dict.find("172.16.0.1").should.equal("Data of 0.0.0.0/0");
@@ -1183,19 +1196,19 @@ describe('ipdict', () => {
         });
 
         it('should return data for 0.0.0.0/0, 10.0.0.0/8, 172.16.0.0/16, 192.168.1.0/24', () => {
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("10.0.0.1", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("172.16.0.1", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
             dict.find("10.0.0.1").should.equal("Data of 10.0.0.0/8");
             dict.find("172.16.0.1").should.equal("Data of 172.16.0.0/16");
             dict.find("192.168.1.1").should.equal("Data of 192.168.1.0/24");
         });
         it('should return undefined(data of 0.0.0.0/0) if data which appropriate is not found', () => {
-            dict.pushDataForIPv4("10.0.0.1", 8, "Data of 10.0.0.0/8");
-            dict.pushDataForIPv4("172.16.0.1", 16, "Data of 172.16.0.0/16");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("10.0.0.1", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.1", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             should.not.exist(dict.find("0.0.0.0"));
             should.not.exist(dict.find("11.0.0.1"));
             should.not.exist(dict.find("172.17.0.1"));
@@ -1228,8 +1241,8 @@ describe('ipdict', () => {
                 | 192.168.1.0/24(d)       |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 16);
 
@@ -1272,8 +1285,8 @@ describe('ipdict', () => {
                 | 192.168.1.0/24(d)       |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 16);
             dict.createGlueNodes(node, 8);
@@ -1319,9 +1332,9 @@ describe('ipdict', () => {
                 | 192.168.129.0/24(d)     |
                 +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.0.0", 16, "Data of 192.168.0.0/16");
-            dict.pushDataForIPv4("192.168.129.0", 24, "Data of 192.168.129.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
+            dict.push("192.168.129.0", 24, "Data of 192.168.129.0/24");
             var node = dict.getRootNode();
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
             dict.createGlueNodes(node, 17);
@@ -1364,9 +1377,9 @@ describe('ipdict', () => {
                 | 192.168.128.0/24(d)     | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 24, "Data of 192.168.0.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
+            dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 16);
 
@@ -1407,9 +1420,9 @@ describe('ipdict', () => {
                 | 192.168.128.0/24(d)     | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 24, "Data of 192.168.0.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
+            dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
@@ -1454,10 +1467,10 @@ describe('ipdict', () => {
                 | 192.168.172.0/24(d)     | | 192.168.128.0/24(d)     | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.172.0", 24, "Data of 192.168.172.0/24");
-            dict.pushDataForIPv4("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 24, "Data of 192.168.0.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.172.0", 24, "Data of 192.168.172.0/24");
+            dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
+            dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
@@ -1504,10 +1517,10 @@ describe('ipdict', () => {
                 | 192.168.128.0/24(d)     | | 192.168.64.0/24(d)      | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.pushDataForIPv4("192.168.64.0", 24, "Data of 192.168.64.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 24, "Data of 192.168.0.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
+            dict.push("192.168.64.0", 24, "Data of 192.168.64.0/24");
+            dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
@@ -1554,11 +1567,11 @@ describe('ipdict', () => {
                 | 192.168.172.0/24(d)     | | 192.168.128.0/24(d)     | | 192.168.64.0/24(d)      | | 192.168.0.0/24(d)       |
                 +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
             */
-            dict.pushDataForIPv4("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            dict.pushDataForIPv4("192.168.172.0", 24, "Data of 192.168.172.0/24");
-            dict.pushDataForIPv4("192.168.128.0", 24, "Data of 192.168.128.0/24");
-            dict.pushDataForIPv4("192.168.64.0", 24, "Data of 192.168.64.0/24");
-            dict.pushDataForIPv4("192.168.0.0", 24, "Data of 192.168.0.0/24");
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.172.0", 24, "Data of 192.168.172.0/24");
+            dict.push("192.168.128.0", 24, "Data of 192.168.128.0/24");
+            dict.push("192.168.64.0", 24, "Data of 192.168.64.0/24");
+            dict.push("192.168.0.0", 24, "Data of 192.168.0.0/24");
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 

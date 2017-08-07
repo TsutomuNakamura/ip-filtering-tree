@@ -105,20 +105,24 @@ exports.IPDict = function() {
                     var parentNode              = parentNodeBacket[I_DELETE_STACK_NODE];
                     var netAddrToParentChild    = parentNodeBacket[I_DELETE_STACK_TO_CHILD];
 
-                    if((parentNode[I_IPV4_LENGTH_OF_SUBNETMASK] !== 0) &&
-                            (parentNode[I_IPV4_IS_GLUE_NODE] === true && Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length === 1)) {
+                    if((parentNode[I_IPV4_LENGTH_OF_SUBNETMASK] != 0) &&
+                            (parentNode[I_IPV4_IS_GLUE_NODE] == true && Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length == 1)) {
                         continue;
                     }
 
-                    var netAddr = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_LENGTH_OF_SUBNETMASK]);
-                    delete parentNode[I_IPV4_REF_CHILD_NODE][netAddr];
-                    if(Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {
+                    delete parentNode[I_IPV4_REF_CHILD_NODE][netAddrToParentChild];
+                    if(Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length == 0) {
                         parentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = undefined;
                         if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] !== undefined) {
                             parentNode[I_IPV4_REF_CHILD_NODE]               = currentNode[I_IPV4_REF_CHILD_NODE];
                             parentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]   = currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
                         }
+                    } else {
+                        myself.rebalanceChildGlueNode(parentNode);
+                        // If all node under the parent node was glue node, remove them then recreate glue nodes as necessary
+                        // var newNode = 
                     }
+                    break;
 
                     //if(parentNode[I_IPV4_IS_GLUE_NODE] === false) {
                     //    // delete node and update data
@@ -156,7 +160,6 @@ exports.IPDict = function() {
                     //    return result;
                     //}
                 }
-
                 return result;
             }
 
@@ -340,6 +343,40 @@ exports.IPDict = function() {
             }
         }
 
+    }
+
+    this.hasGlueNodeOnly = function(node) {
+        var n = node[I_IPV4_REF_CHILD_NODE];
+        for(k in n) {
+            if(n[k][I_IPV4_DATA] !== undefined) return false;
+        }
+        return true;
+    }
+
+    this.rebalanceChildGlueNode = function(node) {
+        if(!myself.hasGlueNodeOnly(node)) return;
+
+        var newNode = myself.createNewOneNode(
+                                    node[I_IPV4_DATA],
+                                    node[I_IPV4_LENGTH_OF_SUBNETMASK],
+                                    node[I_IPV4_IS_GLUE_NODE],
+                                    node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK],
+                                    {});
+        var min = 32;
+        // for(k in oldMap) {
+        //     // Get all subnet length under the glue node
+
+        // }
+    }
+
+    this.hasGlueNodesOnly = function(node) {
+        var map = node[I_IPV4_REF_CHILD_NODE];
+        for(k in map) {
+            if(map[k][I_IPV4_DATA] !== undefined) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

@@ -766,6 +766,11 @@ describe('ipdict', () => {
         });
     });
 
+    describe('#rebaranceChildGlueNode', () => {
+        it('should delete glue node', () => {
+        });
+    });
+
     describe('#delete', () => {
         function createTree01() {
              /*
@@ -896,7 +901,7 @@ describe('ipdict', () => {
             assertTheNode(node, 'Data of 255.255.128.0/17', 17, false, undefined, []);
         });
 
-        it('TODO', () => {
+        it('should delete middle of data that has length of subnetmask 17', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
@@ -929,7 +934,7 @@ describe('ipdict', () => {
             assertTheNode(node, 'Data of 255.255.192.0/18', 18, false, undefined, []);
         });
 
-        it('should delete a sinble data node middle of data node', () => {
+        it('should delete a single node under the glue node that has 2 node', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
@@ -958,13 +963,27 @@ describe('ipdict', () => {
                 +-+-----------------------+ +-------------------------+
                                               |
                                             +-+-----------------------+
-                                            | 172.17.0.0/16(d)        |
+                                            | 172.16.0.0/16(d)        |
                                             +-------------------------+
             */
-            // TODO:
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.0.0.0", 8, "Data of 172.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.17.0.0", 16, "Data of 172.17.0.0/16");
+            dict.delete("172.17.0.0", 16).should.equal("Data of 172.17.0.0/16");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
         });
 
-        it('TODO:', () => {
+        it('should delete a single data node under glue node that has 1 child node', () => {
             /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
@@ -973,15 +992,15 @@ describe('ipdict', () => {
                   +---------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
-                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          |
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          | <- glue node that has 1 child node
                 +-+-----------------------+ +-------------------------+
                   |                           |
-                +-+-----------------------+ +-+-----------------------+
-                | 10.1.0.0/16(d)          | | 172.16.0.0/8(g)         |
-                +-+-----------------------+ +-+-----------------------+
-                                              |
+                +-+-----------------------+   |
+                | 10.1.0.0/16(d)          |   |
+                +-+-----------------------+   |
+                                              | delete
                                             +-+-----------------------+
-                                            | 172.16.0.0/16(d)        |
+                                            | 172.16.1.0/24(d)        |
                                             +-------------------------+
                 > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 +-------------------------+
@@ -996,8 +1015,195 @@ describe('ipdict', () => {
                 | 10.1.0.0/16(d)          |
                 +-------------------------+
             */
-            // TODO:
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("10.1.0.0", 16, "Data of 10.1.0.0/16");
+            dict.push("172.16.1.0", 24, "Data of 172.16.1.0/24");
+            dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
         });
+
+        it('should delete a single data node under 1 data node that has 1 child node', () => {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.1.0.0/16(d)          | | 172.16.0.0/16(d)        | <- 1 data node that has 1 child node
+                +-+-----------------------+ +-------------------------+
+                                              | delete
+                                            +-+-----------------------+
+                                            | 172.16.1.0/24(d)        |
+                                            +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(g)          |
+                +-+-----------------------+ +-+-----------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.1.0.0/16(d)          | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("10.1.0.0", 16, "Data of 10.1.0.0/16");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.16.1.0", 24, "Data of 172.16.1.0/24");
+            dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, undefined, 8, true, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+        });
+
+        it('should delete a single data node under 1 glue node that has 1 child node', () => {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           |
+                  |                           +---------------------------+
+                  |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 10.1.0.0/16(d)          | | 172.16.0.0/16(g)        | | 172.17.0.0/16(d)        |
+                +-+-----------------------+ +-------------------------+ +-------------------------+
+                                              | delete
+                                            +-+-----------------------+
+                                            | 172.16.1.0/24(d)        |
+                                            +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |
+                +-+-----------------------+
+                | 10.1.0.0/16(d)          |
+                +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("10.1.0.0", 16, "Data of 10.1.0.0/16");
+            dict.push("172.0.0.0", 8, "Data of 172.0.0.0/8");
+            dict.push("172.17.0.0", 16, "Data of 172.17.0.0/16");
+            dict.push("172.16.1.0", 24, "Data of 172.16.1.0/24");
+            dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 16, ['172.17.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.17.0.0')];
+            assertTheNode(node1, 'Data of 172.17.0.0/16', 16, false, undefined, []);
+        });
+
+        it('should delete a single data node under 1 glue node that has 1 child node', () => {
+            /*
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           | delete
+                +-+-----------------------+ +-+-----------------------+
+                | 10.1.0.0/16(d)          | | 172.16.0.0/16(d)        |
+                +-+-----------------------+ +-------------------------+
+                                              |
+                                              +---------------------------+
+                                              |                           |
+                                            +-+-----------------------+ +-+-----------------------+
+                                            | 172.16.1.0/24(d)        | | 172.16.2.0/24(d)        |
+                                            +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 10.0.0.0/8(d)           | | 172.0.0.0/8(d)          |
+                +-+-----------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+   |
+                | 10.1.0.0/16(d)          |   |
+                +-+-----------------------+   |
+                                              |
+                                              +---------------------------+
+                                              |                           |
+                                            +-+-----------------------+ +-+-----------------------+
+                                            | 172.16.1.0/24(d)        | | 172.16.2.0/24(d)        |
+                                            +-------------------------+ +-------------------------+
+            */
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("10.1.0.0", 16, "Data of 10.1.0.0/16");
+            dict.push("172.0.0.0", 8, "Data of 172.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.16.1.0", 24, "Data of 172.16.1.0/24");
+            dict.push("172.16.2.0", 24, "Data of 172.16.2.0/24");
+            dict.delete("172.16.0.0", 16).should.equal("Data of 172.16.0.0/16");
+
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 24, ['172.16.1.0', '172.16.2.0']);
+            var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.1.0')];
+            assertTheNode(node2, 'Data of 172.16.1.0/24', 24, false, undefined, []);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.2.0')];
+            assertTheNode(node2, 'Data of 172.16.2.0/24', 24, false, undefined, []);
+        });
+
+
 
         it('should delete a sinble data node middle of data node', () => {
             /*
@@ -1032,7 +1238,7 @@ describe('ipdict', () => {
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");;
 
-           var node = dict.getRootNode();
+            var node = dict.getRootNode();
             assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['172.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
             assertTheNode(node, undefined, 8, true, 16, ['172.16.0.0']);
@@ -1040,25 +1246,24 @@ describe('ipdict', () => {
             assertTheNode(node, 'Data of 172.16.0.0/16', 16, false, undefined, []);
         });
 
-
-        it('TODO', () => {
+        it('should pass integration test', () => {
              /*
                  1) delete
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
                 +-+-----------------------+
                   |
-                  +-------------------------------------------------------+---------------------------+
-                  |                                                       |                           |
-                +-------------------------+                             +-+-----------------------+ +-+-----------------------+
-                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
-                +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
-                  |                                                       |
-                  +---------------------------+                           |
-                  |                           |                           |
-                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 172.16.0.0/16(d)        |
-                +-------------------------+ +-------------------------+ +-------------------------+
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           |
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-------------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
@@ -1155,14 +1360,45 @@ describe('ipdict', () => {
                 +-------------------------+ +-------------------------+
 
             */
-            // TODO:
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.170.0.0", 16, "Data of 192.170.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
+            dict.delete("0.0.0.0", 0);
+
+            var node = dict.getRootNode();
+            assertTheNode(node, undefined, 0, true, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
+            var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node1, undefined, 8, true, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
+            var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node2, undefined, 16, true, 24, ['192.168.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node2, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node2, undefined, 16, true, 24, ['192.169.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node2, 'Data of 192.169.1.0/24', 24, false, undefined, []);
+
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.170.0.0')];
+            assertTheNode(node2, 'Data of 192.170.0.0/16', 16, false, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, undefined, 8, true, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, undefined, []);
+
+            dict.delete('10.0.0.0', 8);
+            dict.dumpTree(dict.getRootNode()); // TODO
+            node = dict.getRootNode();
+            // assertTheNode(node, undefined, 0, true, 8, ['192.0.0.0', '10.0.0.0']);  // FIXME:
+
         });
-
-        it('TODO', () => {
-            // TODO:
-        });
-
-
     });
 
     describe('#find', () => {

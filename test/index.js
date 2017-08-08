@@ -766,8 +766,23 @@ describe('ipdict', () => {
         });
     });
 
+    describe('#hasGlueNodeOnly', () => {
+        it('should return false if no node are existed', () => {
+            // TODO:
+            // dict.hasGlueNodeOnly(dict.getRootNode()).should.equal(false);
+        });
+        it('should return true if all node are glue', () => {
+            // TODO:
+            // node[]
+        });
+        it('should return false if all node are NOT glue', () => {
+            // TODO:
+        });
+    });
+
     describe('#rebaranceChildGlueNode', () => {
         it('should delete glue node', () => {
+            // TODO:
         });
     });
 

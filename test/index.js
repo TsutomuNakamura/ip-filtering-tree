@@ -765,22 +765,54 @@ describe('ipdict', () => {
 
     describe('#hasGlueNodeOnly', () => {
         it('should return false if no node are existed', () => {
-            // TODO:
-            // dict.hasGlueNodeOnly(node).should.equal(false);
+            var node = ["dummy", 0, undefined, {}];
+            dict.hasGlueNodeOnly(node).should.equal(false);
         });
-        it('should return true if all node are glue', () => {
-            // TODO:
-            // node[]
+        it('should return true if the node is glue', () => {
+            var node = [
+                           "dummy", 0, 8, {
+                               0: [undefined, 8, 16, { 100: ["dummy", 16, undefined, {}] }]
+                           }
+                       ];
+            dict.hasGlueNodeOnly(node).should.equal(true);
         });
+        it('should return true if the nodes are glue', () => {
+            var node = [
+                           "dummy", 0, 8, {
+                               0: [undefined, 8, 16, { 100: ["dummy", 16, undefined, {}] }],
+                               1: [undefined, 8, 16, { 100: ["dummy", 16, undefined, {}] }]
+                           }
+                       ];
+            dict.hasGlueNodeOnly(node).should.equal(true);
+        });
+
+        it('should return false if the node is data', () => {
+            var node = [
+                           "dummy", 0, 8, {
+                               02: ["dymmy", 8, 16, { 100: ["dummy", 16, undefined, {}] }]
+                           }
+                       ];
+            dict.hasGlueNodeOnly(node).should.equal(false);
+        });
+
         it('should return false if all node are NOT glue', () => {
-            // TODO:
+            var node = [
+                           "dummy", 0, 8, {
+                               0: [undefined, 8, 16, { 100: ["dummy", 16, undefined, {}] }],
+                               1: [undefined, 8, 16, { 100: ["dummy", 16, undefined, {}] }],
+                               2: ["dymmy", 8, 16, { 100: ["dummy", 16, undefined, {}] }]
+                           }
+                       ];
+            dict.hasGlueNodeOnly(node).should.equal(false);
         });
     });
 
     describe('#rebaranceChildGlueNode', () => {
-        it('should delete glue node', () => {
-            // TODO:
-        });
+        // it('should do nothing if tha node has no child nodes', () => {
+        //     var node = ["dummy", 0, 8, {}];
+        //     dict.rebaranceChildGlueNode(node);
+        //     assertTheNode(node, "dummy", 0, 8, []);
+        // });
     });
 
     describe('#delete', () => {

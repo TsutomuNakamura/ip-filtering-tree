@@ -299,6 +299,7 @@ exports.IPDict = function() {
     }
 
     this.hasGlueNodeOnly = function(node) {
+        if(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === undefined) return false;
         var n = node[I_IPV4_REF_CHILD_NODE];
         for(k in n) {
             if(n[k][I_IPV4_DATA] !== undefined) return false;

@@ -7,14 +7,12 @@ describe('ipdict', () => {
 
     const I_IPV4_DATA                       = 0;
     const I_IPV4_LENGTH_OF_SUBNETMASK       = 1;
-    const I_IPV4_IS_GLUE_NODE               = 2;
-    const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 3;
-    const I_IPV4_REF_CHILD_NODE             = 4;
+    const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 2;
+    const I_IPV4_REF_CHILD_NODE             = 3;
 
-    function assertTheNode(node, data, subnetLength, isGlueNode, subnetLengthOfChild, indexesOfChildNodes) {
+    function assertTheNode(node, data, subnetLength, subnetLengthOfChild, indexesOfChildNodes) {
         should.equal(node[I_IPV4_DATA], data);
         should.equal(node[I_IPV4_LENGTH_OF_SUBNETMASK], subnetLength);
-        should.equal(node[I_IPV4_IS_GLUE_NODE], isGlueNode);
         should.equal(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], subnetLengthOfChild);
 
         should.equal(Object.keys(node[I_IPV4_REF_CHILD_NODE]).length, indexesOfChildNodes.length);
@@ -79,11 +77,10 @@ describe('ipdict', () => {
 
     describe('#createNewOneNode', function() {
         it('should create a new node with specified parameters', () => {
-            var result = dict.createNewOneNode({a: 0}, 16, false, 24, {b: 1});
+            var result = dict.createNewOneNode({a: 0}, 16, 24, {b: 1});
 
             result[I_IPV4_DATA].a.should.equal(0);
             result[I_IPV4_LENGTH_OF_SUBNETMASK].should.equal(16);
-            result[I_IPV4_IS_GLUE_NODE].should.equal(false);
 
             result[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK].should.equal(24);
             result[I_IPV4_REF_CHILD_NODE].b.should.equal(1);
@@ -136,7 +133,7 @@ describe('ipdict', () => {
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, undefined, []);
         });
 
         it('should be able to push a single node 128.0.0.0/1', () => {
@@ -151,9 +148,9 @@ describe('ipdict', () => {
             */
             dict.push("128.0.0.0", 1, "Data of 128.0.0.0/1");
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 1, ['128.0.0.0']);
+            assertTheNode(node, undefined, 0, 1, ['128.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('128.0.0.0')];
-            assertTheNode(node, 'Data of 128.0.0.0/1', 1, false, undefined, []);
+            assertTheNode(node, 'Data of 128.0.0.0/1', 1, undefined, []);
         });
 
 
@@ -172,11 +169,11 @@ describe('ipdict', () => {
             dict.push("128.0.0.0", 1, "Data of 128.0.0.0/1");
             dict.push("0.0.0.0", 1, "Data of 0.0.0.0/1");
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 1, ['128.0.0.0', '0.0.0.0']);
+            assertTheNode(node, undefined, 0, 1, ['128.0.0.0', '0.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('128.0.0.0')];
-            assertTheNode(node1, 'Data of 128.0.0.0/1', 1, false, undefined, []);
+            assertTheNode(node1, 'Data of 128.0.0.0/1', 1, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('0.0.0.0')];
-            assertTheNode(node1, 'Data of 0.0.0.0/1', 1, false, undefined, []);
+            assertTheNode(node1, 'Data of 0.0.0.0/1', 1, undefined, []);
         });
 
         it('should be able to push a node 255.255.255.255/32', () => {
@@ -191,9 +188,9 @@ describe('ipdict', () => {
             */
             dict.push("255.255.255.255", 32, "Data of 255.255.255.255/32");
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 32, ['255.255.255.255']);
+            assertTheNode(node, undefined, 0, 32, ['255.255.255.255']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.255.255')];
-            assertTheNode(node, 'Data of 255.255.255.255/32', 32, false, undefined, []);
+            assertTheNode(node, 'Data of 255.255.255.255/32', 32, undefined, []);
         });
 
         it('should be able to push nodes 255.255.255.255/32, 255.255.255.254/32', () => {
@@ -211,11 +208,11 @@ describe('ipdict', () => {
             dict.push("255.255.255.255", 32, "Data of 255.255.255.255/32");
             dict.push("255.255.255.254", 32, "Data of 255.255.255.254/32");
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 32, ['255.255.255.255', '255.255.255.254']);
+            assertTheNode(node, undefined, 0, 32, ['255.255.255.255', '255.255.255.254']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.255.255')];
-            assertTheNode(node1, 'Data of 255.255.255.255/32', 32, false, undefined, []);
+            assertTheNode(node1, 'Data of 255.255.255.255/32', 32, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.255.254')];
-            assertTheNode(node1, 'Data of 255.255.255.254/32', 32, false, undefined, []);
+            assertTheNode(node1, 'Data of 255.255.255.254/32', 32, undefined, []);
         });
 
         it('should be able to push a node 192.168.1.0/24', () => {
@@ -230,9 +227,9 @@ describe('ipdict', () => {
             */
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 24, ['192.168.1.0']);
+            assertTheNode(node, undefined, 0, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][-1062731520];    // -1062731520 -> 192.168.0.1
-            assertTheNode(node, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.168.2.0/24', () => {
@@ -252,12 +249,12 @@ describe('ipdict', () => {
             dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 24, ['192.168.1.0', '192.168.2.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 24, ['192.168.1.0', '192.168.2.0']);
 
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.2.0')];
-            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.0.0/16, 192.168.1.0/24', () => {
@@ -279,11 +276,11 @@ describe('ipdict', () => {
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
 
             var node1 = dict.getRootNode();
-            assertTheNode(node1, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node1, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.0.0/16, 192.168.1.0/24, 192.168.2.0/24', () => {
@@ -308,13 +305,13 @@ describe('ipdict', () => {
             dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0', '192.168.2.0']);
+            assertTheNode(node, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0', '192.168.2.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.2.0')];
-            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.0.0/16, 192.168.1.0/24, 172.16.0.0/16', () => {
@@ -339,13 +336,13 @@ describe('ipdict', () => {
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0', '172.16.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0', '172.16.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.168.0.0/16', () => {
@@ -367,11 +364,11 @@ describe('ipdict', () => {
             dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.168.0.0/16, 192.168.2.0/24', () => {
@@ -396,13 +393,13 @@ describe('ipdict', () => {
             dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0', '192.168.2.0']);
+            assertTheNode(node, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0', '192.168.2.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.2.0')];
-            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.2.0/24', 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.168.0.0/16, 172.16.0.0/16', () => {
@@ -427,13 +424,13 @@ describe('ipdict', () => {
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0', '172.16.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0', '172.16.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node1, 'Data of 192.168.0.0/16', 16, 24, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
         });
 
 
@@ -461,13 +458,13 @@ describe('ipdict', () => {
             dict.push("192.0.0.0", 8, "Data of 192.0.0.0/8");
 
             var node = dict.getRootNode();
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, false, 8, ['192.0.0.0']);
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
-            assertTheNode(node, "Data of 192.0.0.0/8", 8, false, 16, ['192.168.0.0']);
+            assertTheNode(node, "Data of 192.0.0.0/8", 8, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, "Data of 192.168.0.0/16", 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node, "Data of 192.168.1.0/24", 24, false, undefined, []);
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 192.0.0.0/8, 192.168.0.0/16', () => {
@@ -494,13 +491,13 @@ describe('ipdict', () => {
             dict.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, false, 8, ['192.0.0.0']);
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
-            assertTheNode(node, "Data of 192.0.0.0/8", 8, false, 16, ['192.168.0.0']);
+            assertTheNode(node, "Data of 192.0.0.0/8", 8, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, "Data of 192.168.0.0/16", 16, false, 24, ['192.168.1.0']);
+            assertTheNode(node, "Data of 192.168.0.0/16", 16, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node, "Data of 192.168.1.0/24", 24, false, undefined, []);
+            assertTheNode(node, "Data of 192.168.1.0/24", 24, undefined, []);
         });
 
         it('should be able to push nodes 192.168.1.0/24, 172.16.0.0/16', () => {
@@ -523,28 +520,28 @@ describe('ipdict', () => {
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 16, ['192.168.0.0', '172.16.0.0']);
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '172.16.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         function assertSetType3(dict) {
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 16, ['192.168.0.0', '192.169.0.0', '172.16.0.0']);
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '192.169.0.0', '172.16.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, false, undefined, []);
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
-            assertTheNode(node1, undefined, 16, true, 24, ['192.169.1.0']);
+            assertTheNode(node1, undefined, 16, 24, ['192.169.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
-            assertTheNode(node1, "Data of 192.169.1.0/24", 24, false, undefined, []);
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node1, "Data of 192.168.1.0/24", 24, false, undefined, []);
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
         }
 
 
@@ -594,25 +591,25 @@ describe('ipdict', () => {
 
         function assertSetType5(dict) {
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
+            assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
-            assertTheNode(node1, undefined, 8, true, 16, ['192.168.0.0', '192.169.0.0']);
+            assertTheNode(node1, undefined, 8, 16, ['192.168.0.0', '192.169.0.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node2, undefined, 16, 24, ['192.168.1.0']);
             node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, false, undefined, []);
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
-            assertTheNode(node2, "Data of 192.169.0.0/16", 16, false, 24, ['192.169.1.0']);
+            assertTheNode(node2, "Data of 192.169.0.0/16", 16, 24, ['192.169.1.0']);
             node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, false, undefined, []);
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, undefined, 8, true, 16, ['172.16.0.0']);
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, "Data of 172.16.0.0/16", 16, false, undefined, []);
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, "Data of 10.0.0.0/8", 8, false, undefined, []);
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
         }
 
         it('should be able to push nodes 192.168.1.0/24, 192.168.1.0/24, 172.16.0.0/16, 10.0.0.0/8, 192.169.0.0/16', () => {
@@ -769,7 +766,7 @@ describe('ipdict', () => {
     describe('#hasGlueNodeOnly', () => {
         it('should return false if no node are existed', () => {
             // TODO:
-            // dict.hasGlueNodeOnly(dict.getRootNode()).should.equal(false);
+            // dict.hasGlueNodeOnly(node).should.equal(false);
         });
         it('should return true if all node are glue', () => {
             // TODO:
@@ -831,7 +828,7 @@ describe('ipdict', () => {
             dict.delete("0.0.0.0", 0).should.equal("Data of 0.0.0.0/0");;
 
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, undefined, []);
+            assertTheNode(node, undefined, 0, undefined, []);
         });
 
         it('should delete a single data node', () => {
@@ -853,7 +850,7 @@ describe('ipdict', () => {
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, undefined, []);
         });
 
         it('should delete a single root node', () => {
@@ -880,7 +877,7 @@ describe('ipdict', () => {
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, undefined, []);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, undefined, []);
         });
 
         it('should delete subnet the data that has length of subnetmask 18', () => {
@@ -911,9 +908,9 @@ describe('ipdict', () => {
             dict.delete("255.255.192.0", 18).should.equal("Data of 255.255.192.0/18");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['255.255.128.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 17, ['255.255.128.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.128.0')];
-            assertTheNode(node, 'Data of 255.255.128.0/17', 17, false, undefined, []);
+            assertTheNode(node, 'Data of 255.255.128.0/17', 17, undefined, []);
         });
 
         it('should delete middle of data that has length of subnetmask 17', () => {
@@ -944,9 +941,9 @@ describe('ipdict', () => {
             dict.delete("255.255.128.0", 17).should.equal("Data of 255.255.128.0/17");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 18, ['255.255.192.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 18, ['255.255.192.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('255.255.192.0')];
-            assertTheNode(node, 'Data of 255.255.192.0/18', 18, false, undefined, []);
+            assertTheNode(node, 'Data of 255.255.192.0/18', 18, undefined, []);
         });
 
         it('should delete a single node under the glue node that has 2 node', () => {
@@ -989,13 +986,13 @@ describe('ipdict', () => {
             dict.delete("172.17.0.0", 16).should.equal("Data of 172.17.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0', '172.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 16, ['172.16.0.0']);
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, 16, ['172.16.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
         });
 
         it('should delete a single data node under glue node that has 1 child node', () => {
@@ -1037,11 +1034,11 @@ describe('ipdict', () => {
             dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, 16, ['10.1.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
-            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, undefined, []);
         });
 
         it('should delete a single data node under 1 data node that has 1 child node', () => {
@@ -1086,15 +1083,15 @@ describe('ipdict', () => {
             dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0', '172.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, 16, ['10.1.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
-            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, undefined, 8, true, 16, ['172.16.0.0']);
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
         });
 
         it('should delete a single data node under 1 glue node that has 1 child node', () => {
@@ -1142,15 +1139,15 @@ describe('ipdict', () => {
             dict.delete("172.16.1.0", 24).should.equal("Data of 172.16.1.0/24");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0', '172.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, 16, ['10.1.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
-            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 16, ['172.17.0.0']);
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, 16, ['172.17.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.17.0.0')];
-            assertTheNode(node1, 'Data of 172.17.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.17.0.0/16', 16, undefined, []);
         });
 
         it('should delete a single data node under 1 glue node that has 1 child node', () => {
@@ -1205,17 +1202,17 @@ describe('ipdict', () => {
             dict.delete("172.16.0.0", 16).should.equal("Data of 172.16.0.0/16");
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['10.0.0.0', '172.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0', '172.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, 16, ['10.1.0.0']);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, 16, ['10.1.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.1.0.0')];
-            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.1.0.0/16', 16, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, false, 24, ['172.16.1.0', '172.16.2.0']);
+            assertTheNode(node1, 'Data of 172.0.0.0/8', 8, 24, ['172.16.1.0', '172.16.2.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.1.0')];
-            assertTheNode(node2, 'Data of 172.16.1.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 172.16.1.0/24', 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.2.0')];
-            assertTheNode(node2, 'Data of 172.16.2.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 172.16.2.0/24', 24, undefined, []);
         });
 
 
@@ -1254,11 +1251,11 @@ describe('ipdict', () => {
             dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");;
 
             var node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['172.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['172.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node, undefined, 8, true, 16, ['172.16.0.0']);
+            assertTheNode(node, undefined, 8, 16, ['172.16.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node, 'Data of 172.16.0.0/16', 16, undefined, []);
         });
 
         it('should pass integration test', () => {
@@ -1384,34 +1381,34 @@ describe('ipdict', () => {
             dict.delete("0.0.0.0", 0);
 
             var node = dict.getRootNode();
-            assertTheNode(node, undefined, 0, true, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
+            assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
-            assertTheNode(node1, undefined, 8, true, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
+            assertTheNode(node1, undefined, 8, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node2, undefined, 16, 24, ['192.168.1.0']);
             node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node2, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.1.0/24', 24, undefined, []);
 
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
-            assertTheNode(node2, undefined, 16, true, 24, ['192.169.1.0']);
+            assertTheNode(node2, undefined, 16, 24, ['192.169.1.0']);
             node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
-            assertTheNode(node2, 'Data of 192.169.1.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.169.1.0/24', 24, undefined, []);
 
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.170.0.0')];
-            assertTheNode(node2, 'Data of 192.170.0.0/16', 16, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.170.0.0/16', 16, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            assertTheNode(node1, undefined, 8, true, 16, ['172.16.0.0']);
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, false, undefined, []);
+            assertTheNode(node1, 'Data of 172.16.0.0/16', 16, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
-            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, false, undefined, []);
+            assertTheNode(node1, 'Data of 10.0.0.0/8', 8, undefined, []);
 
             dict.delete('10.0.0.0', 8);
             dict.dumpTree(dict.getRootNode()); // TODO
             node = dict.getRootNode();
-            // assertTheNode(node, undefined, 0, true, 8, ['192.0.0.0', '10.0.0.0']);  // FIXME:
+            // assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '10.0.0.0']);  // FIXME:
 
         });
     });
@@ -1497,11 +1494,11 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 16);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node, undefined, 16, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         it('should create a single glue node over the glue node', () => {
@@ -1542,13 +1539,13 @@ describe('ipdict', () => {
             dict.createGlueNodes(node, 16);
             dict.createGlueNodes(node, 8);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 8, ['192.0.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['192.0.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
-            assertTheNode(node, undefined, 8, true, 16, ['192.168.0.0']);
+            assertTheNode(node, undefined, 8, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, undefined, 16, true, 24, ['192.168.1.0']);
+            assertTheNode(node, undefined, 16, 24, ['192.168.1.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
-            assertTheNode(node, 'Data of 192.168.1.0/24', 24, false, undefined, []);
+            assertTheNode(node, 'Data of 192.168.1.0/24', 24, undefined, []);
         });
 
         it('should create a single glue node under the middle of data node', () => {
@@ -1591,13 +1588,13 @@ describe('ipdict', () => {
             dict.createGlueNodes(node, 17);
 
             node = dict.getRootNode();
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, 'Data of 192.168.0.0/16', 16, false, 17, ['192.168.128.0']);
+            assertTheNode(node, 'Data of 192.168.0.0/16', 16, 17, ['192.168.128.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node, undefined, 17, true, 24, ['192.168.129.0']);
+            assertTheNode(node, undefined, 17, 24, ['192.168.129.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.129.0')];
-            assertTheNode(node, 'Data of 192.168.129.0/24', 24, false, undefined, []);
+            assertTheNode(node, 'Data of 192.168.129.0/24', 24, undefined, []);
         });
 
         it('should create 1 glue node over the 2 data nodes', () => {
@@ -1634,13 +1631,13 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 16);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 16, ['192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 16, ['192.168.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node, undefined, 16, true, 24, ['192.168.128.0', '192.168.0.0']);
+            assertTheNode(node, undefined, 16, 24, ['192.168.128.0', '192.168.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node1, 'Data of 192.168.128.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.128.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, 'Data of 192.168.0.0/24', 24, false, undefined, []);
+            assertTheNode(node1, 'Data of 192.168.0.0/24', 24, undefined, []);
         });
 
         it('should create 2 glue node that has 1 child data node', () => {
@@ -1677,15 +1674,15 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['192.168.128.0', '192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 17, ['192.168.128.0', '192.168.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.128.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.128.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.0.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.0.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, undefined, []);
         });
 
         it('should create 2 glue node that has 2 child data node and has 1 child data node', () => {
@@ -1725,17 +1722,17 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['192.168.128.0', '192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 17, ['192.168.128.0', '192.168.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.172.0', '192.168.128.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.172.0', '192.168.128.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.172.0')];
-            assertTheNode(node2, 'Data of 192.168.172.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.172.0/24', 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.0.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.0.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, undefined, []);
         });
 
         it('should create 2 glue node that has 1 child data node and has 2 child data node', () => {
@@ -1775,17 +1772,17 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['192.168.128.0', '192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 17, ['192.168.128.0', '192.168.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.128.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.128.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.0.0', '192.168.64.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.0.0', '192.168.64.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.64.0')];
-            assertTheNode(node2, 'Data of 192.168.64.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.64.0/24', 24, undefined, []);
         });
 
         it('should create 2 glue node that has 2 child data node and has 2 child data node', () => {
@@ -1826,19 +1823,19 @@ describe('ipdict', () => {
             var node = dict.getRootNode();
             dict.createGlueNodes(node, 17);
 
-            assertTheNode(node, 'Data of 0.0.0.0/0', 0, false, 17, ['192.168.128.0', '192.168.0.0']);
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 17, ['192.168.128.0', '192.168.0.0']);
             var node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.172.0', '192.168.128.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.172.0', '192.168.128.0']);
             var node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.172.0')];
-            assertTheNode(node2, 'Data of 192.168.172.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.172.0/24', 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.128.0')];
-            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.128.0/24', 24, undefined, []);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node1, undefined, 17, true, 24, ['192.168.0.0', '192.168.64.0']);
+            assertTheNode(node1, undefined, 17, 24, ['192.168.0.0', '192.168.64.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
-            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.0.0/24', 24, undefined, []);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.64.0')];
-            assertTheNode(node2, 'Data of 192.168.64.0/24', 24, false, undefined, []);
+            assertTheNode(node2, 'Data of 192.168.64.0/24', 24, undefined, []);
         });
     });
 

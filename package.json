@@ -1,0 +1,31 @@
+{
+  "name": "ipdict",
+  "version": "1.0.0",
+  "description": "On memory database indexed by IP addresses.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TsutomuNakamura/ipdict.git"
+  },
+  "keywords": [
+    "ipdict",
+    "ip",
+    "dictionary",
+    "tree"
+  ],
+  "author": "Tsutomu Nakamura <tsuna.0x00@gmail.com> (http://qiita.com/TsutomuNakamura)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TsutomuNakamura/ipdict/issues"
+  },
+  "homepage": "https://github.com/TsutomuNakamura/ipdict#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "mocha-sinon": "^1.1.6",
+    "sinon": "^1.17.6"
+  }
+}

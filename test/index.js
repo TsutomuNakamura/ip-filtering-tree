@@ -1557,18 +1557,15 @@ describe('ipdict', () => {
                 | 10.0.0.0/8(d)           |
                 +-+-----------------------+
             */
-            // TODO:
-            // dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
-            // dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            // dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
-            // dict.delete("172.16.0.0", 16).should.equal("Data of 172.16.0.0/16");;
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            dict.delete("172.16.0.0", 16).should.equal("Data of 172.16.0.0/16");;
 
-            // var node = dict.getRootNode();
-            // assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['172.0.0.0']);
-            // node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
-            // assertTheNode(node, undefined, 8, 16, ['172.16.0.0']);
-            // node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
-            // assertTheNode(node, 'Data of 172.16.0.0/16', 16, undefined, []);
+            var node = dict.getRootNode();
+            assertTheNode(node, 'Data of 0.0.0.0/0', 0, 8, ['10.0.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node, "Data of 10.0.0.0/8", 8, undefined, []);
         });
 
         it('should delete a single data node with rebalancing glue node', () => {
@@ -1595,9 +1592,13 @@ describe('ipdict', () => {
                 | 172.16.0.0/16(d)        |
                 +-------------------------+
             */
-            // TODO:
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            var node = dict.getRootNode();
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 16, ['172.16.0.0']);
+            node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node, "Data of 172.16.0.0/16", 16, undefined, []);
         });
-
 
         it('should pass integration test', () => {
              /*
@@ -1626,17 +1627,31 @@ describe('ipdict', () => {
                 | 0.0.0.0/0(g)            |
                 +-+-----------------------+
                   |
-                  +-------------------------------------------------------+---------------------------+
-                  |                                                       |                           | 2) delete
-                +-------------------------+                             +-+-----------------------+ +-+-----------------------+
-                | 192.0.0.0/8(g)          |                             | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
-                +-+-----------------------+                             +-+-----------------------+ +-+-----------------------+
-                  |                                                       |
-                  +---------------------------+                           |
-                  |                           |                           |
-                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 172.16.0.0/16(d)        |
-                +-------------------------+ +-------------------------+ +-------------------------+
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           | 2) delete
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
+                  |                           |
+                +-+-----------------------+ +-+-----------------------+
+                | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
+                +-------------------------+ +-------------------------+
+                > delete >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(g)            |
+                +-+-----------------------+
+                  |
+                  +---------------------------+---------------------------+---------------------------+
+                  |                           |                           |                           | 3) delete
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-+-----------------------+ +-+-----------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
@@ -1647,10 +1662,10 @@ describe('ipdict', () => {
                 +-+-----------------------+
                   |
                   +---------------------------+---------------------------+
-                  |                           |                           | 3) delete
+                  |                           |                           | 4) delete
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
-                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 172.16.0.0/16(d)        |
-                +-------------------------+ +-------------------------+ +-------------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       |
+                +-+-----------------------+ +-+-----------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
@@ -1707,11 +1722,26 @@ describe('ipdict', () => {
                 +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       | | 172.16.0.0/16(d)        |
                 +-------------------------+ +-------------------------+ +-+-----------------------+
+                > add 192.170.0.0/16 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                +-------------------------+
+                | 0.0.0.0/0(d)            |
+                +-+-----------------------+
+                  |
+                  +-----------------------------------------------------------------------------------+---------------------------+
+                  |                                                                                   |                           |
+                +-------------------------+                                                         +-+-----------------------+ +-+-----------------------+
+                | 192.0.0.0/8(g)          |                                                         | 172.0.0.0/8(g)          | | 10.0.0.0/8(d)           |
+                +-+-----------------------+                                                         +-+-----------------------+ +-------------------------+
+                  |                                                                                   |
+                  +---------------------------+---------------------------+                           |
+                  |                           |                           |                           |
+                +-+-----------------------+ +-+-----------------------+ +-+-----------------------+ +-+-----------------------+
+                | 192.168.0.0/16(g)       | | 192.169.0.0/16(g)       | | 192.170.0.0/16(d)       | | 172.16.0.0/16(d)        |
+                +-------------------------+ +-------------------------+ +-------------------------+ +-------------------------+
                   |                           |
                 +-+-----------------------+ +-+-----------------------+
                 | 192.168.1.0/24(d)       | | 192.169.1.0/24(d)       |
                 +-------------------------+ +-------------------------+
-
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
@@ -1720,6 +1750,7 @@ describe('ipdict', () => {
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             dict.delete("0.0.0.0", 0);
+            // ---------------------------------------------------------
 
             var node = dict.getRootNode();
             assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
@@ -1746,10 +1777,121 @@ describe('ipdict', () => {
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
             assertTheNode(node1, 'Data of 10.0.0.0/8', 8, undefined, []);
 
+            // ---------------------------------------------------------
+
             dict.delete('10.0.0.0', 8);
             node = dict.getRootNode();
-            // assertTheNode(node, undefined, 0, 8, ['192.0.0.0', '10.0.0.0']);  // FIXME:
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0', '172.16.0.0']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
 
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.169.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.170.0.0')];
+            assertTheNode(node1, "Data of 192.170.0.0/16", 16, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
+
+            // --------------------------------------------------------------
+
+            dict.delete('172.16.0.0', 16);
+            node = dict.getRootNode();
+            assertTheNode(node, undefined, 0, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.168.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node1, undefined, 16, 24, ['192.169.1.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            // -----------------------------------------------------------------
+            dict.delete('192.170.0.0', 16);
+            node = dict.getRootNode();
+            assertTheNode(node, undefined, 0, 24, ['192.168.1.0', '192.169.1.0']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            // -----------------------------------------------------------------
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            node = dict.getRootNode();
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 24, ['192.168.1.0', '192.169.1.0']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node1, "Data of 192.168.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node1, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            // -----------------------------------------------------------------
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
+            node = dict.getRootNode();
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0', '10.0.0.0']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node1, undefined, 8, 24, ['192.168.1.0', '192.169.1.0']);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
+
+            // -----------------------------------------------------------------
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            node = dict.getRootNode();
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0/8', '172.0.0.0/8', '10.0.0.0/8']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node1, undefined, 8, 24, ['192.168.1.0', '192.169.1.0']);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
+
+            // -----------------------------------------------------------------
+            dict.push('192.170.0.0', 16, "Data of 192.170.0.0/16");
+            node = dict.getRootNode();
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0/8', '172.0.0.0/8', '10.0.0.0/8']);
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
+            assertTheNode(node1, undefined, 8, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
+            assertTheNode(node2, undefined, 16, 24, ['192.168.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
+            assertTheNode(node2, undefined, 16, 24, ['192.169.1.0']);
+            node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, undefined, []);
+
+            node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.170.0.0')];
+            assertTheNode(node2, "Data of 192.170.0.0/16", 16, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
+            assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
+            node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
+            assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
+
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+            assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
         });
     });
 

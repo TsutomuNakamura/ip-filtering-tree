@@ -40,5 +40,15 @@ console.log(deleted);  // -> Data of 192.168.1.0/24
 db.find("192.168.1.0", 24);  // -> undefined
 ```
 
+## algorithms
+ipdict use the algorithm tree diagram for reduce search time for data that user has pushed.
+Images for searching data by using key is like below.
+
+
+
+
+
+
+
 
 

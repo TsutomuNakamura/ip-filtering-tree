@@ -298,6 +298,10 @@ exports.IPDict = function() {
 
     }
 
+    /**
+     * Check the node has glue node only of not as child.
+     * @param {Object} node
+     */
     this.hasGlueNodeOnly = function(node) {
         if(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === undefined) return false;
         var n = node[I_IPV4_REF_CHILD_NODE];
@@ -307,19 +311,56 @@ exports.IPDict = function() {
         return true;
     }
 
+    /**
+     * Rebalance the child node.
+     * If the node has glue nodes only, delete them and recreate the reference to the nodes under their nodes.
+     * @param {Object} node
+     */
     this.rebalanceChildGlueNode = function(node) {
-        if(!myself.hasGlueNodeOnly(node)) return;
+        if(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === 32
+                || !myself.hasGlueNodeOnly(node)
+                || node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === undefined) return;
+
+        // TODO: If child glue nodes under 'node' have length of subnetmask 31, it all have to do is delete glue node and point the nodes under their glue nodes.
+        //       In other words, we don't have to check whether recreate the glue node or not.
+
+        var oldChildNodes   = node[I_IPV4_REF_CHILD_NODE];
+        var len             = undefined;
+        var minimum         = 32;
+        var variance        = {};
+        var doCreate        = false;
+
+        for(k in oldChildNodes) {
+            len = oldChildNodes[k][I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
+            if(len === undefined) continue;
+            variance[len] = undefined;
+            if(minimum > len) minimum = len;
+
+            if(node[I_IPV4_LENGTH_OF_SUBNETMASK] >= (len - 2)) {
+                doCreate = true;
+                break;
+            }
+        }
+
+        if(doCreate || Object.keys(variance).length > 1) doCreate = true;
 
         var newNode = myself.createNewOneNode(
                                     node[I_IPV4_DATA],
                                     node[I_IPV4_LENGTH_OF_SUBNETMASK],
-                                    node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK],
+                                    minimum,
                                     {});
-        var min = 32;
-        // for(k in oldMap) {
-        //     // Get all subnet length under the glue node
 
-        // }
+        for(k in oldChildNodes) {
+            if(doCreate && oldChildNodes[k][I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] > minimum) {
+                myself.createGlueNodes(oldChildNodes[k], minimum);
+            }
+            for(k2 in oldChildNodes[k][I_IPV4_REF_CHILD_NODE]) {
+                newNode[I_IPV4_REF_CHILD_NODE][k2] = oldChildNodes[k][I_IPV4_REF_CHILD_NODE][k2];
+            }
+        }
+
+        node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = newNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK];
+        node[I_IPV4_REF_CHILD_NODE]             = newNode[I_IPV4_REF_CHILD_NODE];
     }
 
     this.hasGlueNodesOnly = function(node) {

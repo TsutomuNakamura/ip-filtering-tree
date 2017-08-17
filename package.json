@@ -24,6 +24,7 @@
   "homepage": "https://github.com/TsutomuNakamura/ipdict#readme",
   "devDependencies": {
     "chai": "^3.5.0",
+    "ipaddr.js": "^1.4.0",
     "mocha": "^3.2.0",
     "mocha-sinon": "^1.1.6",
     "sinon": "^1.17.6"

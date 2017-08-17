@@ -28,15 +28,7 @@ exports.IPDict = function() {
     const I_IPV4_LENGTH_OF_CHILD_SUBNETMASK = 2;
     /** Index of reference of child node */
     const I_IPV4_REF_CHILD_NODE             = 3;
-//    /** Index of reference of child node */
-//    const I_IPV4_CHILD_ELEMENTS             = 3;
-//
-//    /** Index of subnet mask length in child node */
-//    const I_CHILD_SUBNET_LENGTH             = 0;
-//    /** Index of child nodes */
-//    const I_CHILD_NODES                     = 1;
 
-    //var iPv4Dict = {};
     var iPv4Dict = [  /* node to store root node */
         undefined,
         undefined,
@@ -44,11 +36,11 @@ exports.IPDict = function() {
         {}
     ];
     iPv4Dict[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] = 0;
-    iPv4Dict[I_IPV4_REF_CHILD_NODE][0] = [         /* Network address */
-        undefined,          /* Data */
-        0,                  /* Length of subnetmask */
-        undefined,          /* Length of child subnetmask */
-        {}                  /* child nodes map */
+    iPv4Dict[I_IPV4_REF_CHILD_NODE][0] = [      /* Network address */
+        undefined,                              /* Data */
+        0,                                      /* Length of subnetmask */
+        undefined,                              /* Length of child subnetmask */
+        {}                                      /* child nodes map */
     ];
 
     /**
@@ -61,8 +53,9 @@ exports.IPDict = function() {
         return myself.deleteDataToIPv4Tree(iPv4Dict[I_IPV4_REF_CHILD_NODE][0], iPv4Dict, myself.iPv4StringToBinary(iPv4), len);
     }
 
-    /**  */
+    /** Index of node will be deleted */
     const I_DELETE_STACK_NODE       = 0;
+    /** Index of child node of node will be deleted */
     const I_DELETE_STACK_TO_CHILD   = 1;
 
     this.deleteDataToIPv4Tree = function(node, pNode, ip, length) {
@@ -79,7 +72,6 @@ exports.IPDict = function() {
                     return undefined;
                 }
                 result = currentNode[I_IPV4_DATA];
-                // TODO: delete and return
 
                 if(currentNode[I_IPV4_LENGTH_OF_SUBNETMASK] === 0) {
                     // Delete root node as glue node
@@ -114,8 +106,6 @@ exports.IPDict = function() {
                         }
                     } else {
                         myself.rebalanceChildGlueNode(parentNode);
-                        // If all node under the parent node was glue node, remove them then recreate glue nodes as necessary
-                        // var newNode = 
                     }
                     break;
                 }
@@ -189,24 +179,18 @@ exports.IPDict = function() {
         var parentNode          = pNode;
         var lastNetworkAddress  = 0;
 
-        // console.log("Pusing -> IP: " + myself.stringifyFromBinIPv4(binaryIPv4) + ", subnetLength: " + subnetLength + ", data: " + data);
-
         while(true) {
             var subnetLengthOfCurrentNode   = currentNode[I_IPV4_LENGTH_OF_SUBNETMASK];
             var networkAddress              = myself.getBinIPv4NetAddr(binaryIPv4, subnetLength);
 
             if(subnetLengthOfCurrentNode === subnetLength) {
-                // console.log("# DEBUG: # push section 1 ############################################");  /* DEBUG: */
-
                 // The data may have been existed
                 if(currentNode[I_IPV4_DATA] !== undefined) {
                     // The data have been existed!
                     throw new Error("Aboart pushing due to the data has already existed.");
                 }
 
-                // FIXME: to atomic
                 // Override the data in this glue node.
-
                 parentNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(
                                                                             data,
                                                                             subnetLengthOfCurrentNode,
@@ -214,14 +198,7 @@ exports.IPDict = function() {
                                                                             currentNode[I_IPV4_REF_CHILD_NODE]);
                 break;
             } else if(subnetLengthOfCurrentNode < subnetLength) {
-
-                // var networkAddress = myself.getBinIPv4NetAddr(binaryIPv4, subnetLength);
-
                 if(Object.keys(currentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {
-
-                    // console.log("# DEBUG: # push section 2 ############################################");  /* DEBUG: */
-
-                    // FIXME: createNewChildElement()
                     var newNode = myself.createNewOneNode(
                                             currentNode[I_IPV4_DATA],
                                             currentNode[I_IPV4_LENGTH_OF_SUBNETMASK],
@@ -229,39 +206,23 @@ exports.IPDict = function() {
                                             currentNode[I_IPV4_REF_CHILD_NODE]);
 
                     newNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(data, subnetLength, undefined, {});
-                    // console.log("current NetworkAddress -> " + myself.stringifyFromBinIPv4(networkAddress));
-                    // console.log("lastNetworkAddress -> " + myself.stringifyFromBinIPv4(lastNetworkAddress));
                     parentNode[I_IPV4_REF_CHILD_NODE][lastNetworkAddress] = newNode;
-                    // myself.dumpTree(myself.getRootNode());
 
                     break;
                 }
 
                 if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] > subnetLength) {
 
-                    // console.log("# DEBUG: # push section 3 ############################################");  /* DEBUG: */
-                    // insert and create glue node for existing node as needed
-                    // #########################################################
                     // Create glue node then check the glue node's network address.
                     //   If match: continue
                     //   If not match: insert the node then break
-
                     myself.createGlueNodes(currentNode, subnetLength);
-
                     if(!(networkAddress in currentNode[I_IPV4_REF_CHILD_NODE])) {
                         currentNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(data, subnetLength, undefined, {});
-
                         break;
                     }
-
-                    // TODO: debug
-                    //myself.dumpTree(currentNode);
-                    // TODO: ここは到達不能では?
-
-                    // TODO: continue
+                    // unreachable?
                 } else if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] < subnetLength) {
-                    // console.log("# DEBUG: # push section 4 ############################################");  /* DEBUG: */
-
                     // continue then new node will be appended
                     var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
 
@@ -269,17 +230,11 @@ exports.IPDict = function() {
                         currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress]
                                 = myself.createNewOneNode(undefined, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], undefined, {});
                     }
-                    // TODO: debug
-                    //myself.dumpTree(currentNode);  // FIXME: ???
                     parentNode  = currentNode;
                     currentNode = currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress];
-                    //lastNetworkAddress = networkAddress;
                     lastNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_SUBNETMASK]);
-                    // myself.dumpTree(myself.getRootNode());  /* TODO: debug */
-
-                    // TODO: continue
+                    // continue
                 } else {
-                    // console.log("# DEBUG: # push section 5 ############################################");  /* DEBUG: */
                     if(!currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4]) {
                         currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4]
                                 = myself.createNewOneNode(undefined, subnetLength, undefined, {});
@@ -288,11 +243,7 @@ exports.IPDict = function() {
                     currentNode = currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4];    /* continue */
                 }
             } else {
-                // no way
-
                 console.log("Never reachable.");
-
-                return;  // TODO:
             }
         }
 
@@ -320,10 +271,6 @@ exports.IPDict = function() {
         if(node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === 32
                 || !myself.hasGlueNodeOnly(node)
                 || node[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] === undefined) return;
-
-        // TODO: If child glue nodes under 'node' have length of subnetmask 31, it all have to do is delete glue node and point the nodes under their glue nodes.
-        //       In other words, we don't have to check whether recreate the glue node or not.
-
         var oldChildNodes   = node[I_IPV4_REF_CHILD_NODE];
         var len             = undefined;
         var minimum         = 32;

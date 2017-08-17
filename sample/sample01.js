@@ -19,7 +19,6 @@ http.createServer(function(request, response) {
         }
     }
 
-    console.log("Src IP: " + srcip);
     response.end(fs.readFileSync(db.find(srcip)));
 }).listen(8080);
 

@@ -4,14 +4,10 @@ exports.IPDict = function() {
     /** Instance of myself */
     const myself = this;
 
-    /** 0 of 32bit unsigned integer */
-    const INT32_0 = ~~0;
-
     /** IPv4 subnet masks */
     const iPv4NetMasks = (function () {
         var masks   = new Array(32 + 1);
         var mask    = ~~0xffffffff;
-        var bit     = 0;
 
         for(var i = 32; i >= 0; --i) {
             masks[i] = mask;

@@ -178,10 +178,10 @@ exports.IPDict = function() {
         var currentNode         = node;
         var parentNode          = pNode;
         var lastNetworkAddress  = 0;
+        var networkAddress      = myself.getBinIPv4NetAddr(binaryIPv4, subnetLength);
 
         while(true) {
             var subnetLengthOfCurrentNode   = currentNode[I_IPV4_LENGTH_OF_SUBNETMASK];
-            var networkAddress              = myself.getBinIPv4NetAddr(binaryIPv4, subnetLength);
 
             if(subnetLengthOfCurrentNode === subnetLength) {
                 // The data may have been existed
@@ -205,8 +205,8 @@ exports.IPDict = function() {
                                             subnetLength,
                                             currentNode[I_IPV4_REF_CHILD_NODE]);
 
-                    newNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(data, subnetLength, undefined, {});
-                    parentNode[I_IPV4_REF_CHILD_NODE][lastNetworkAddress] = newNode;
+                    newNode[I_IPV4_REF_CHILD_NODE][networkAddress]          = myself.createNewOneNode(data, subnetLength, undefined, {});
+                    parentNode[I_IPV4_REF_CHILD_NODE][lastNetworkAddress]   = newNode;
 
                     break;
                 }
@@ -230,9 +230,9 @@ exports.IPDict = function() {
                         currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress]
                                 = myself.createNewOneNode(undefined, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK], undefined, {});
                     }
-                    parentNode  = currentNode;
-                    currentNode = currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress];
-                    lastNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_SUBNETMASK]);
+                    parentNode          = currentNode;
+                    currentNode         = currentNode[I_IPV4_REF_CHILD_NODE][childNetworkAddress];
+                    lastNetworkAddress  = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_SUBNETMASK]);
                     // continue
                 } else {
                     if(!currentNode[I_IPV4_REF_CHILD_NODE][binaryIPv4]) {

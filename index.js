@@ -310,16 +310,6 @@ exports.IPDict = function() {
         node[I_IPV4_REF_CHILD_NODE]             = newNode[I_IPV4_REF_CHILD_NODE];
     }
 
-    this.hasGlueNodesOnly = function(node) {
-        var map = node[I_IPV4_REF_CHILD_NODE];
-        for(k in map) {
-            if(map[k][I_IPV4_DATA] !== undefined) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Convert the IPv4 string to an unsignet 32bit integer.
      * @param {string} IPv4

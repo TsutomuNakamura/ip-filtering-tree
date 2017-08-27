@@ -209,15 +209,9 @@ exports.IPDict = function() {
 
                 if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] > subnetLength) {
 
-                    // Create glue node then check the glue node's network address.
-                    //   If match: continue
-                    //   If not match: insert the node then break
+                    // Create glue node if no glue node was existed.
+                    // If data node was already existed, createGlueNodes does nothing then continues then throws error.
                     myself.createGlueNodes(currentNode, subnetLength);
-                    if(!(networkAddress in currentNode[I_IPV4_REF_CHILD_NODE])) {
-                        currentNode[I_IPV4_REF_CHILD_NODE][networkAddress] = myself.createNewOneNode(data, subnetLength, undefined, {});
-                        break;
-                    }
-                    // unreachable?
                 } else if(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] < subnetLength) {
                     // continue then new node will be appended
                     var childNetworkAddress = myself.getBinIPv4NetAddr(binaryIPv4, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);

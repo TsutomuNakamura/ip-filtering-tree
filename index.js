@@ -279,7 +279,7 @@ exports.IPDict = function() {
             }
         }
 
-        if(doCreate || Object.keys(variance).length > 1) doCreate = true;
+        if(Object.keys(variance).length > 1) doCreate = true;
 
         var newNode = myself.createNewOneNode(
                                     node[I_IPV4_DATA],

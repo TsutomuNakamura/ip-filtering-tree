@@ -600,14 +600,14 @@ describe('ipdict', () => {
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.0.0')];
             assertTheNode(node2, "Data of 192.169.0.0/16", 16, 24, ['192.169.1.0']);
             node2 = node2[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.169.1.0')];
-            assertTheNode(node2, "Data of 192.168.1.0/24", 24, undefined, []);
+            assertTheNode(node2, "Data of 192.169.1.0/24", 24, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.0.0.0')];
             assertTheNode(node1, undefined, 8, 16, ['172.16.0.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];
             assertTheNode(node1, "Data of 172.16.0.0/16", 16, undefined, []);
 
-            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
+             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('10.0.0.0')];
             assertTheNode(node1, "Data of 10.0.0.0/8", 8, undefined, []);
         }
 
@@ -634,7 +634,7 @@ describe('ipdict', () => {
                 +-------------------------+ +-------------------------+
             */
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
-            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
@@ -666,7 +666,7 @@ describe('ipdict', () => {
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
             dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             assertSetType5(dict);
         });
@@ -695,7 +695,7 @@ describe('ipdict', () => {
             */
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             assertSetType5(dict);
@@ -725,7 +725,7 @@ describe('ipdict', () => {
             */
             dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
-            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             assertSetType5(dict);
@@ -757,7 +757,7 @@ describe('ipdict', () => {
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
             dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
             dict.push("192.169.0.0", 16, "Data of 192.169.0.0/16");
-            dict.push("192.169.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.169.1.0", 24, "Data of 192.169.1.0/24");
             assertSetType5(dict);
         });
     });

@@ -996,7 +996,7 @@ describe('ipdict', () => {
         });
 
         it('should only delete glue node and link the nodes under glue nodes with creating new glue nodes', () => {
-             /*
+            /*
                 +-------------------------+
                 | 0.0.0.0/0(d)            |
                 +-+-----------------------+

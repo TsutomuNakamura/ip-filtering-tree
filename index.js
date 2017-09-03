@@ -58,7 +58,6 @@ exports.IPDict = function() {
         var currentNode                 = node;
         var subnetLengthOfCurrentNode   = currentNode[I_IPV4_LENGTH_OF_SUBNETMASK];
         var result                      = node[I_IPV4_DATA];
-        var netAddr                     = undefined;
         var stack                       = [[pNode, 0]];
 
         while(true) {

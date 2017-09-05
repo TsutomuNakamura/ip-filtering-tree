@@ -89,6 +89,7 @@ exports.IPDict = function() {
 
                     if((parentNode[I_IPV4_LENGTH_OF_SUBNETMASK] != 0) &&
                             (parentNode[I_IPV4_DATA] === undefined && Object.keys(parentNode[I_IPV4_REF_CHILD_NODE]).length == 1)) {
+                        // The parent glue node will be deleted with target node
                         continue;
                     }
 
@@ -108,7 +109,7 @@ exports.IPDict = function() {
             }
 
             var chNetAddr   = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
-            nextNode    = currentNode[I_IPV4_REF_CHILD_NODE][chNetAddr];
+            var nextNode    = currentNode[I_IPV4_REF_CHILD_NODE][chNetAddr];
             if(nextNode !== undefined) {
                 stack.push([currentNode, chNetAddr]);
                 currentNode = nextNode;

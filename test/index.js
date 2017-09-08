@@ -1593,7 +1593,10 @@ describe('ipdict', () => {
                 +-------------------------+
             */
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("10.0.0.0", 8, "Data of 10.0.0.0/8");
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.delete("10.0.0.0", 8).should.equal("Data of 10.0.0.0/8");
+
             var node = dict.getRootNode();
             assertTheNode(node, "Data of 0.0.0.0/0", 0, 16, ['172.16.0.0']);
             node = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('172.16.0.0')];

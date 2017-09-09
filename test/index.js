@@ -1853,7 +1853,7 @@ describe('ipdict', () => {
             // -----------------------------------------------------------------
             dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
             node = dict.getRootNode();
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0/8', '172.0.0.0/8', '10.0.0.0/8']);
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
             assertTheNode(node1, undefined, 8, 24, ['192.168.1.0', '192.169.1.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
@@ -1872,7 +1872,7 @@ describe('ipdict', () => {
             // -----------------------------------------------------------------
             dict.push('192.170.0.0', 16, "Data of 192.170.0.0/16");
             node = dict.getRootNode();
-            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0/8', '172.0.0.0/8', '10.0.0.0/8']);
+            assertTheNode(node, "Data of 0.0.0.0/0", 0, 8, ['192.0.0.0', '172.0.0.0', '10.0.0.0']);
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.0.0.0')];
             assertTheNode(node1, undefined, 8, 16, ['192.168.0.0', '192.169.0.0', '192.170.0.0']);
             node2 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];

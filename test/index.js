@@ -1899,7 +1899,7 @@ describe('ipdict', () => {
     });
 
     describe('#find', () => {
-        it('find', () => {
+        it('should return root node if existed', () => {
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             dict.find("0.0.0.0").should.equal("Data of 0.0.0.0/0");
         });

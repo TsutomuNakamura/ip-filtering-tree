@@ -130,7 +130,7 @@ exports.IPDict = function() {
     }
 
     this.find = function(keyIP) {
-        var ip              = myself.iPv4StringToBinary(keyIP, 32);
+        var ip              = myself.iPv4StringToBinary(keyIP);
         var netAddr         = undefined;    /* should 0.0.0.0 at first time */
         var currentNode     = iPv4Dict[I_IPV4_REF_CHILD_NODE][0];
         var nextNode        = undefined;

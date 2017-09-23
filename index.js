@@ -192,6 +192,13 @@ exports.IPDict = function() {
                                                                             subnetLengthOfCurrentNode,
                                                                             currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK],
                                                                             currentNode[I_IPV4_REF_CHILD_NODE]);
+                var childOfParent = parentNode[I_IPV4_REF_CHILD_NODE];
+                for(var k in childOfParent) {
+                    if(myself.hasGlueNodeOnly(childOfParent[k])) {
+                        myself.rebalanceChildGlueNode(childOfParent[k]);
+                    }
+                }
+
                 break;
             } else if(subnetLengthOfCurrentNode < subnetLength) {
                 if(Object.keys(currentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {

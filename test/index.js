@@ -64,7 +64,6 @@ describe('ipdict', () => {
         });
 
         it('should throws exception when the invalid format of IPv4 was specified.', () => {
-            // TODO: exception when invalid format was detected.
             (() => { dict.iPv4StringToBinary(''); }).should.throw(TypeError, 'Format of IPv4 address "" is illegal');
             (() => { dict.iPv4StringToBinary('foo'); }).should.throw(TypeError, 'Format of IPv4 address "foo" is illegal');
             (() => { dict.iPv4StringToBinary('0.0.0.0.0'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0.0.0" is illegal');
@@ -553,7 +552,7 @@ describe('ipdict', () => {
         });
 
         it('should not be able to push undefined data', () => {
-            (() => {dict.push("0.0.0.0", 0, undefined)}).should.throw(Error, "Cannot push undefined to the tree");
+            (() => {dict.push("0.0.0.0", 0, undefined)}).should.throw(TypeError, "Cannot push undefined as a data to the tree");
         });
 
         it('should be able to push a root node 0.0.0.0/0', () => {

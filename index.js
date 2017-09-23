@@ -136,6 +136,8 @@ exports.IPDict = function() {
         var nextNode        = undefined;
         var result          = currentNode[I_IPV4_DATA];
 
+        // TODO: Use cache for increasing performance.
+
         while(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] !== undefined) {
             netAddr = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
             if(nextNode = currentNode[I_IPV4_REF_CHILD_NODE][netAddr]) {
@@ -159,7 +161,7 @@ exports.IPDict = function() {
      */
     this.push = function(iPv4, len, data) {
         if(data === undefined) {
-            throw Error("Cannot push undefined to the tree");
+            throw TypeError("Cannot push undefined as a data to the tree");
         }
         myself.pushDataToIPv4Tree(iPv4Dict[I_IPV4_REF_CHILD_NODE][0], iPv4Dict, myself.iPv4StringToBinary(iPv4), len, data);
     }

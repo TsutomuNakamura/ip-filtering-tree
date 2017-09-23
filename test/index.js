@@ -65,16 +65,16 @@ describe('ipdict', () => {
 
         it('should throws exception when the invalid format of IPv4 was specified.', () => {
             // TODO: exception when invalid format was detected.
-            (() => { dict.iPv4StringToBinary(''); }).should.throw(Error, ' is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
-            (() => { dict.iPv4StringToBinary('foo'); }).should.throw(Error, 'foo is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
-            (() => { dict.iPv4StringToBinary('0.0.0.0.0'); }).should.throw(Error, '0.0.0.0.0 is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
-            (() => { dict.iPv4StringToBinary('0.0.0'); }).should.throw(Error, '0.0.0 is not a valid IPv4 address format. It\'s format must be "n.n.n.n".');
+            (() => { dict.iPv4StringToBinary(''); }).should.throw(TypeError, 'Format of IPv4 address "" is illegal');
+            (() => { dict.iPv4StringToBinary('foo'); }).should.throw(TypeError, 'Format of IPv4 address "foo" is illegal');
+            (() => { dict.iPv4StringToBinary('0.0.0.0.0'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0.0.0" is illegal');
+            (() => { dict.iPv4StringToBinary('0.0.0'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0" is illegal');
 
-            (() => { dict.iPv4StringToBinary('0.0.0.'); }).should.throw(Error, 'Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(0.0.0.).');
-            (() => { dict.iPv4StringToBinary('.255.255.255'); }).should.throw(Error, 'Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(.255.255.255).');
-            (() => { dict.iPv4StringToBinary('foo.255.255.255'); }).should.throw(Error, 'Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(foo.255.255.255).');
-            (() => { dict.iPv4StringToBinary('0.0.0.256'); }).should.throw(Error, 'Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(0.0.0.256).');
-            (() => { dict.iPv4StringToBinary('0.0.0.-1'); }).should.throw(Error, 'Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(0.0.0.-1).');
+            (() => { dict.iPv4StringToBinary('0.0.0.'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0." is illegal');
+            (() => { dict.iPv4StringToBinary('.255.255.255'); }).should.throw(TypeError, 'Format of IPv4 address ".255.255.255" is illegal');
+            (() => { dict.iPv4StringToBinary('foo.255.255.255'); }).should.throw(TypeError, 'Format of IPv4 address "foo.255.255.255" is illegal');
+            (() => { dict.iPv4StringToBinary('0.0.0.256'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0.256" is illegal');
+            (() => { dict.iPv4StringToBinary('0.0.0.-1'); }).should.throw(TypeError, 'Format of IPv4 address "0.0.0.-1" is illegal');
         });
     });
 

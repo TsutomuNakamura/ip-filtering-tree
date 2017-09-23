@@ -1271,7 +1271,7 @@ describe('ipdict', () => {
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.0.0')];
             assertTheNode(node1, "Data of 192.168.0.0/27", 27, undefined, []);
 
-            node1 = node.[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
+            node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
             assertTheNode(node1, undefined, 26, 27, ['192.168.1.0']);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary('192.168.1.0')];
             assertTheNode(node1, "Data of 192.168.1.0/27", 27, undefined, []);
@@ -1308,7 +1308,7 @@ describe('ipdict', () => {
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary("192.168.0.0")]
             assertTheNode(node1, undefined, 24, 27, ["192.168.0.0"]);
             node1 = node1[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary("192.168.0.0")];
-            assertTheNode(node1, "Data of 192.168.0.0/27", 27, undefined, new String[]{});
+            assertTheNode(node1, "Data of 192.168.0.0/27", 27, undefined, []);
 
             node1 = node[I_IPV4_REF_CHILD_NODE][dict.iPv4StringToBinary("192.168.1.0")];
             assertTheNode(node1, undefined, 24, 27, ["192.168.1.0"]);

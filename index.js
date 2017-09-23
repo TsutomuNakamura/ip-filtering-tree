@@ -136,6 +136,8 @@ exports.IPDict = function() {
         var nextNode        = undefined;
         var result          = currentNode[I_IPV4_DATA];
 
+        // TODO: Use cache for increasing performance.
+
         while(currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK] !== undefined) {
             netAddr = myself.getBinIPv4NetAddr(ip, currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK]);
             if(nextNode = currentNode[I_IPV4_REF_CHILD_NODE][netAddr]) {
@@ -159,7 +161,7 @@ exports.IPDict = function() {
      */
     this.push = function(iPv4, len, data) {
         if(data === undefined) {
-            throw Error("Cannot push undefined to the tree");
+            throw TypeError("Cannot push undefined as a data to the tree");
         }
         myself.pushDataToIPv4Tree(iPv4Dict[I_IPV4_REF_CHILD_NODE][0], iPv4Dict, myself.iPv4StringToBinary(iPv4), len, data);
     }
@@ -192,6 +194,13 @@ exports.IPDict = function() {
                                                                             subnetLengthOfCurrentNode,
                                                                             currentNode[I_IPV4_LENGTH_OF_CHILD_SUBNETMASK],
                                                                             currentNode[I_IPV4_REF_CHILD_NODE]);
+                var childOfParent = parentNode[I_IPV4_REF_CHILD_NODE];
+                for(var k in childOfParent) {
+                    if(myself.hasGlueNodeOnly(childOfParent[k])) {
+                        myself.rebalanceChildGlueNode(childOfParent[k]);
+                    }
+                }
+
                 break;
             } else if(subnetLengthOfCurrentNode < subnetLength) {
                 if(Object.keys(currentNode[I_IPV4_REF_CHILD_NODE]).length === 0) {
@@ -310,17 +319,14 @@ exports.IPDict = function() {
         var tmpOctet    = 0;
 
         if(arrIPv4.length != 4) {
-            // TODO: Change error more adequate
-            throw new Error(iPv4 + " is not a valid IPv4 address format. It's format must be \"n.n.n.n\".");
+            throw new TypeError("Format of IPv4 address \"" + iPv4 + "\" is illegal");
         }
 
         for(var i = 0; i < arrIPv4.length; ++i) {
             binIPv4 <<= 8;
             tmpOctet = parseInt(arrIPv4[i]);
             if(isNaN(tmpOctet) || tmpOctet > 255 || tmpOctet < 0) {
-                // TODO: Change error more adequate
-                throw new Error(
-                    "Each octet must be greater or equal to 0 and less or equal 255 or is not NaN(" + iPv4 + ").");
+                throw new TypeError("Format of IPv4 address \"" + iPv4 + "\" is illegal");
             }
             binIPv4 += parseInt(arrIPv4[i]);
         }

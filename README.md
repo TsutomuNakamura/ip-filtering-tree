@@ -128,6 +128,5 @@ console.log("Listing on port " + 8080);
 ```
 
 ## algorithms
-ipdict use the algorithm tree diagram for reduce search time for data that user has pushed.
-Images for searching data by using key is like below.
+TODO:
 

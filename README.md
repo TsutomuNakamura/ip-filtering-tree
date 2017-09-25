@@ -23,14 +23,17 @@ var db = new IPDict();
 
 * push
 ```javascript
-db.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
 // push(<ipaddr>, <subnet mask length>, <data>);
+db.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+db.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+db.push("192.168.0.0", 16, "Data of 192.168.0.0/16");
 ```
 
 * find
 ```javascript
-var result = db.find("192.168.1.0", 24);
-console.log(result);  // -> Data of 192.168.1.0/24
+db.find("192.168.1.0");    // -> Data of 192.168.1.0/24
+db.find("192.168.2.100");    // -> Data of 192.168.2.0/24
+db.find("192.168.101.32");    // -> Data of 192.168.0.0/16
 ```
 
 * delete
@@ -52,7 +55,7 @@ var http = require('http');
 var fs = require('fs');
 
 var db = new IPDict();
-db.push("0.0.0.0", 0, "./html/accept.html");
+db.push("0.0.0.0", 0, "./html/accept.html");  /* It is a default */
 db.push("192.168.1.0", 24, "./html/deny.html");
 db.push("127.0.0.0", 8, "./html/monitor.html");
 
@@ -121,6 +124,7 @@ console.log("Listing on port " + 8080);
 ```
 
 ## Algorithms 00
+It is the case to search the data reaches top of the leaf without mismatch.
 
 ### - 00-00 -----------------------------------------------------------------------------------------------
 ![algorithms00_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_00.png)
@@ -135,6 +139,7 @@ console.log("Listing on port " + 8080);
 ![algorithms00_03](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_03.png)
 
 ## Algorithms 01
+It is the case to search the data reaches middle of the leaf with mismatch.
 
 ### - 01-00 -----------------------------------------------------------------------------------------------
 ![algorithms01_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_00.png)

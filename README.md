@@ -49,7 +49,6 @@ Specific usage examples in the program are as follows.
 ```javascript
 var IPDict = require("../index.js").IPDict;
 var http = require('http');
-var ipaddr = require('ipaddr.js');
 var fs = require('fs');
 
 var db = new IPDict();
@@ -59,14 +58,8 @@ db.push("127.0.0.0", 8, "./html/monitor.html");
 
 http.createServer(function(request, response) {
     response.writeHead(200, {'Content-Type': 'text/plain'});
+    // This instruction assumes always returns correct IPv4 address.
     var srcip = request.connection.remoteAddress;
-
-    if(ipaddr.IPv6.isValid(srcip)) {
-        srcip = ipaddr.IPv6.parse(srcip);
-        if(srcip.isIPv4MappedAddress()) {
-            srcip = srcip.toIPv4Address().toString();
-        }
-    }
 
     response.end(fs.readFileSync(db.find(srcip)));
 }).listen(8080);

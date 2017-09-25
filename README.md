@@ -1,6 +1,6 @@
 # ipdict
 ipdict is high performance on-memory database with key of ip address written in JavaScript.
-And ipdict can search data various types flexibly.
+It can search data various types flexibly with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
 
 ## Getting Started
 ### Installing

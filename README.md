@@ -127,6 +127,30 @@ http.createServer(function(request, response) {
 console.log("Listing on port " + 8080);
 ```
 
-## algorithms
-TODO:
+## Algorithms 00
 
+### - 00-00 -----------------------------------------------------------------------------------------------
+![algorithms00_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_00.png)
+
+### - 00-01 -----------------------------------------------------------------------------------------------
+![algorithms00_01](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_01.png)
+
+### - 00-02 -----------------------------------------------------------------------------------------------
+![algorithms00_02](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_02.png)
+
+### - 00-03 -----------------------------------------------------------------------------------------------
+![algorithms00_03](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_03.png)
+
+## Algorithms 01
+
+### - 01-00 -----------------------------------------------------------------------------------------------
+![algorithms01_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_00.png)
+
+### - 01-01 -----------------------------------------------------------------------------------------------
+![algorithms01_01](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_01.png)
+
+### - 01-02 -----------------------------------------------------------------------------------------------
+![algorithms01_02](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_02.png)
+
+### - 01-03 -----------------------------------------------------------------------------------------------
+![algorithms01_03](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_03.png)

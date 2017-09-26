@@ -52,7 +52,7 @@ Specific usage examples in the program are as follows.
 
 * push file names and open appropriate files for each source ip address.
 ```javascript
-var IPFilteringTree = require("../index.js").IPFilteringTree;
+var IPFilteringTree = require("ip-filtering-tree").IPFilteringTree;
 var http = require('http');
 var fs = require('fs');
 

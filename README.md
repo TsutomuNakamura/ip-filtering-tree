@@ -1,24 +1,23 @@
-# ipdict
-ipdict is high performance on-memory database with key of ip address written in JavaScript.
+# ip-filtering-tree
+ip-filtering-treeis high performance on-memory database with key of ip address written in JavaScript.
 It can search data various types flexibly with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
 
 ## Getting Started
 ### Installing
-Installing ipdict is very simple.
-You just exec command like below.
+Installing ip-filtering-tree is just run npm install command.
 
 ```
-# npm install ipdict
+# npm install ip-filtering-tree
 ```
 
-### Using
-How to use ipdict fundamentally is only to use push, find and delete method after import ipdet modules.
+### How to use
+How to use ip-filtering-tree fundamentally is only to use push, find and delete method after import ipdet modules.
 Examples how to use are like below.
 
 * Instantiate
 ```javascript
-var IPDict = require('ipdict').IPDict;
-var db = new IPDict();
+var IPFilteringTree = require('ip-filtering-tree').IPFilteringTree;
+var db = new IPFilteringTree();
 ```
 
 * push
@@ -40,21 +39,24 @@ db.find("192.168.101.32");    // -> Data of 192.168.0.0/16
 ```javascript
 var deleted = db.delete("192.168.1.0", 24);
 console.log(deleted);  // -> Data of 192.168.1.0/24
-db.find("192.168.1.0", 24);  // -> undefined
+db.find("192.168.1.0", 24);  // -> data of 192.168.0.0/16
+deleted = db.delete("192.168.0.0", 16);
+console.log(deleted);  // -> Data of 192.168.0.0/16
+db.find("192.168.1.0", 24);  // -> undefined (Data of 0.0.0.0/0)
 ```
 
 * push file names as string
 ## Use examples
-ipdict can push various data such as string, boolean, number or function indexed by IP address.
+ip-filtering-treecan push various data such as string, boolean, number or function indexed by IP address.
 Specific usage examples in the program are as follows.
 
 * push file names and open appropriate files for each source ip address.
 ```javascript
-var IPDict = require("../index.js").IPDict;
+var IPFilteringTree = require("../index.js").IPFilteringTree;
 var http = require('http');
 var fs = require('fs');
 
-var db = new IPDict();
+var db = new IPFilteringTree();
 db.push("0.0.0.0", 0, "./html/accept.html");  /* It is a default */
 db.push("192.168.1.0", 24, "./html/deny.html");
 db.push("127.0.0.0", 8, "./html/monitor.html");
@@ -72,12 +74,12 @@ console.log("Listing on port " + 8080);
 
 * push functions and call them
 ```javascript
-var IPDict = require("../index.js").IPDict;
+var IPFilteringTree = require("ip-filtering-tree").IPFilteringTree;
 var http = require('http');
 var ipaddr = require('ipaddr.js');
 var fs = require('fs');
 
-var db = new IPDict();
+var db = new IPFilteringTree();
 db.push("0.0.0.0", 0, function(response) {
     response.writeHead(404, {'Content-Type': 'text/plain'});
     response.end("404 Not Found\n");
@@ -127,31 +129,31 @@ console.log("Listing on port " + 8080);
 It is the case to search the data reaches top of the leaf without mismatch.
 
 ### - 00-00 -----------------------------------------------------------------------------------------------
-![algorithms00_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_00.png)
+![algorithms00_00](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_00.png)
 
 ### - 00-01 -----------------------------------------------------------------------------------------------
-![algorithms00_01](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_01.png)
+![algorithms00_01](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_01.png)
 
 ### - 00-02 -----------------------------------------------------------------------------------------------
-![algorithms00_02](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_02.png)
+![algorithms00_02](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_02.png)
 
 ### - 00-03 -----------------------------------------------------------------------------------------------
-![algorithms00_03](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_00_03.png)
+![algorithms00_03](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_03.png)
 
 ## Algorithms 01
 It is the case to search the data reaches middle of the leaf with mismatch.
 
 ### - 01-00 -----------------------------------------------------------------------------------------------
-![algorithms01_00](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_00.png)
+![algorithms01_00](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_01_00.png)
 
 ### - 01-01 -----------------------------------------------------------------------------------------------
-![algorithms01_01](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_01.png)
+![algorithms01_01](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_01_01.png)
 
 ### - 01-02 -----------------------------------------------------------------------------------------------
-![algorithms01_02](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_02.png)
+![algorithms01_02](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_01_02.png)
 
 ### - 01-03 -----------------------------------------------------------------------------------------------
-![algorithms01_03](https://github.com/TsutomuNakamura/ipdict/wiki/img/00_readme/basic_algo_01_03.png)
+![algorithms01_03](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_01_03.png)
 
 ## License
 This software is released under the MIT License, see LICENSE.txt.

@@ -1,5 +1,5 @@
 
-exports.IPDict = function() {
+exports.IPFilteringTree = function() {
 
     /** Instance of myself */
     const myself = this;

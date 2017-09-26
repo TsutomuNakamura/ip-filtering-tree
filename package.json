@@ -1,5 +1,5 @@
 {
-  "name": "ipdict",
+  "name": "ip-filtering-tree",
   "version": "1.0.3",
   "description": "On memory database indexed by IP addresses.",
   "main": "index.js",
@@ -8,20 +8,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TsutomuNakamura/ipdict.git"
+    "url": "git+https://github.com/TsutomuNakamura/ip-filtering-tree.git"
   },
   "keywords": [
-    "ipdict",
     "ip",
-    "dictionary",
+    "filter",
+    "ip filter",
+    "filtering",
+    "ip filtering",
     "tree"
   ],
   "author": "Tsutomu Nakamura <tsuna.0x00@gmail.com> (http://qiita.com/TsutomuNakamura)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TsutomuNakamura/ipdict/issues"
+    "url": "https://github.com/TsutomuNakamura/ip-filtering-tree/issues"
   },
-  "homepage": "https://github.com/TsutomuNakamura/ipdict#readme",
+  "homepage": "https://github.com/TsutomuNakamura/ip-filtering-tree#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "ipaddr.js": "^1.4.0",

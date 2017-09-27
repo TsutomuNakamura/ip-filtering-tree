@@ -1,18 +1,20 @@
 # ip-filtering-tree
-ip-filtering-treeis high performance on-memory database with key of ip address written in JavaScript.
-It can search data various types flexibly with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
+ip-filtering-tree is high performance on-memory database with key of ip address written in JavaScript.
+Due to benefits of applying this algorithm, there are little lag even if a lots of record were registered in the db as long as the permit the space of memory.
+
+It can also search data various types flexibly with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
 
 ## Getting Started
 ### Installing
-Installing ip-filtering-tree is just run npm install command.
+Installing the module is just run the command like below.
 
 ```
 # npm install ip-filtering-tree
 ```
 
-### How to use
-How to use ip-filtering-tree fundamentally is only to use push, find and delete method after import ipdet modules.
-Examples how to use are like below.
+### Usage
+The basic usage of ip-filtering-tree is to call push, find and delete functions after import this module.
+Examples are like below.
 
 * Instantiate
 ```javascript
@@ -37,20 +39,17 @@ db.find("192.168.101.32");    // -> Data of 192.168.0.0/16
 
 * delete
 ```javascript
-var deleted = db.delete("192.168.1.0", 24);
-console.log(deleted);  // -> Data of 192.168.1.0/24
-db.find("192.168.1.0", 24);  // -> data of 192.168.0.0/16
-deleted = db.delete("192.168.0.0", 16);
-console.log(deleted);  // -> Data of 192.168.0.0/16
-db.find("192.168.1.0", 24);  // -> undefined (Data of 0.0.0.0/0)
+db.delete("192.168.1.0", 24);    // -> Data of 192.168.1.0/24
+db.find("192.168.1.0");  // -> data of 192.168.0.0/16
+db.delete("192.168.0.0", 16);    // -> Data of 192.168.0.0/16
+db.find("192.168.1.0");  // -> undefined (Data of 0.0.0.0/0)
 ```
 
-* push file names as string
 ## Use examples
-ip-filtering-treecan push various data such as string, boolean, number or function indexed by IP address.
+ip-filtering-tree can push various data such as string, boolean, number or function indexed by IP address.
 Specific usage examples in the program are as follows.
 
-* push file names and open appropriate files for each source ip address.
+* Push file names and open appropriate files for each source ip address.
 ```javascript
 var IPFilteringTree = require("ip-filtering-tree").IPFilteringTree;
 var http = require('http');
@@ -72,7 +71,7 @@ http.createServer(function(request, response) {
 console.log("Listing on port " + 8080);
 ```
 
-* push functions and call them
+* Push functions and call them for each source ip address.
 ```javascript
 var IPFilteringTree = require("ip-filtering-tree").IPFilteringTree;
 var http = require('http');
@@ -119,6 +118,7 @@ http.createServer(function(request, response) {
         }
     }
 
+    /* Find the appropriate function and call it with the parameter 'response' */
     db.find(srcip)(response);
 }).listen(8080);
 
@@ -126,6 +126,7 @@ console.log("Listing on port " + 8080);
 ```
 
 ## Algorithms 00
+
 It is the case to search the data reaches top of the leaf without mismatch.
 
 ### - 00-00 -----------------------------------------------------------------------------------------------

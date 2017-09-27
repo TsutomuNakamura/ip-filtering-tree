@@ -1,8 +1,8 @@
 var chai    = require('chai'),
     should  = chai.should();
-const IPDict = require('../index').IPDict;
+const IPFilteringTree = require('../index').IPFilteringTree;
 
-describe('ipdict', () => {
+describe('IPFilteringTree', () => {
     var dict = undefined;
 
     const I_IPV4_DATA                       = 0;
@@ -22,7 +22,7 @@ describe('ipdict', () => {
     }
 
     beforeEach(function() {
-        dict = new IPDict();
+        dict = new IPFilteringTree();
     });
 
     describe('#iPv4StringToBinary', () => {

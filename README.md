@@ -1,7 +1,11 @@
 # ip-filtering-tree
+
+[![NPM](https://nodei.co/npm/ip-filtering-tree.png)](https://nodei.co/npm/ip-filtering-tree/) 
+
 [![Build Status](https://travis-ci.org/TsutomuNakamura/ip-filtering-tree.svg?branch=master)](https://travis-ci.org/TsutomuNakamura/ip-filtering-tree) 
 [![npm](https://img.shields.io/npm/v/ip-filtering-tree.svg)](https://npmjs.com/package/ip-filtering-tree) 
 [![GitHub license](https://img.shields.io/github/license/TsutomuNakamura/ip-filtering-tree.svg)](https://github.com/TsutomuNakamura/ip-filtering-tree) 
+[![npm total downloads](https://img.shields.io/npm/dt/ip-filtering-tree.svg)](https://github.com/TsutomuNakamura/ip-filtering-tree) 
 
 ip-filtering-tree is high performance on-memory database with key of ip address written in JavaScript.
 Due to benefits of applying this algorithm, there are little lag even if a lots of record were registered in the db as long as the permit the space of memory.

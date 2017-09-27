@@ -164,5 +164,9 @@ It is the case to search the data reaches middle of the leaf with mismatch.
 ### - 01-03 -----------------------------------------------------------------------------------------------
 ![algorithms01_03](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_01_03.png)
 
+## TODO
+* Apply IPv6 features
+* Apply cache features
+
 ## License
 This software is released under the MIT License, see LICENSE.txt.

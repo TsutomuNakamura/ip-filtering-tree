@@ -1,6 +1,6 @@
 {
   "name": "ip-filtering-tree",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "On memory database indexed by IP addresses.",
   "main": "index.js",
   "scripts": {

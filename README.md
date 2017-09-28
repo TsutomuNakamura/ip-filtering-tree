@@ -117,14 +117,8 @@ db.push("127.0.0.0", 8, function(response) {
 
 http.createServer(function(request, response) {
     response.writeHead(200, {'Content-Type': 'text/plain'});
+    // This instruction assumes always returns correct IPv4 address.
     var srcip = request.connection.remoteAddress;
-
-    if(ipaddr.IPv6.isValid(srcip)) {
-        srcip = ipaddr.IPv6.parse(srcip);
-        if(srcip.isIPv4MappedAddress()) {
-            srcip = srcip.toIPv4Address().toString();
-        }
-    }
 
     /* Find the appropriate function and call it with the parameter 'response' */
     db.find(srcip)(response);
@@ -133,9 +127,12 @@ http.createServer(function(request, response) {
 console.log("Listing on port " + 8080);
 ```
 
-## Algorithms 00
+# Illustration of processing
+ip-filtering-tree searches data by using tree algorithm.
+In this section, I will illustrate the processing in minute details to find the data from the ip-filtering-tree.
 
-It is the case to search the data reaches top of the leaf without mismatch.
+## Case 1
+It is the case to search the data reaches end of the leaf without mismatch.
 
 ### - 00-00 -----------------------------------------------------------------------
 ![algorithms00_00](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_00.png)
@@ -145,9 +142,6 @@ It is the case to search the data reaches top of the leaf without mismatch.
 
 ### - 00-02 -----------------------------------------------------------------------
 ![algorithms00_02](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_02.png)
-
-### - 00-03 -----------------------------------------------------------------------
-![algorithms00_03](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_03.png)
 
 ## Algorithms 01
 It is the case to search the data reaches middle of the leaf with mismatch.
@@ -167,6 +161,7 @@ It is the case to search the data reaches middle of the leaf with mismatch.
 ## TODO
 * Apply IPv6 features
 * Apply cache features
+* Implement iterable functions
 
 ## License
 This software is released under the MIT License, see LICENSE.txt.

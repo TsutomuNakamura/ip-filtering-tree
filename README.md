@@ -143,7 +143,7 @@ It is the case to search the data reaches end of the leaf without mismatch.
 ### - 00-02 -----------------------------------------------------------------------
 ![algorithms00_02](https://github.com/TsutomuNakamura/ip-filtering-tree/wiki/img/00_readme/basic_algo_00_02.png)
 
-## Algorithms 01
+## Case 2
 It is the case to search the data reaches middle of the leaf with mismatch.
 
 ### - 01-00 -----------------------------------------------------------------------

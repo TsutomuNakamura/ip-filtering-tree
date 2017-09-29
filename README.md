@@ -8,7 +8,7 @@
 [![npm total downloads](https://img.shields.io/npm/dt/ip-filtering-tree.svg)](https://github.com/TsutomuNakamura/ip-filtering-tree) 
 
 ip-filtering-tree is high performance on-memory database with key of ip address written in JavaScript.
-Due to benefits of applying this algorithm, there are little lag even if a lots of record were registered in the db as long as the permit the space of memory.
+Due to benefits of applying tree algorithm, there are little lag even if a lots of record were registered in the db as long as the permit the space of memory.
 
 It can also search data various types flexibly with Longest prefix match(also called Maximum prefix length match) rules by using tree algorithms.
 
@@ -129,7 +129,7 @@ console.log("Listing on port " + 8080);
 
 # Illustration of processing
 ip-filtering-tree searches data by using tree algorithm.
-In this section, I will illustrate the processing in minute details to find the data from the ip-filtering-tree.
+In this section, I will illustrate the processing in details to find the data from the ip-filtering-tree.
 
 ## Case 1
 It is the case to search the data reaches end of the leaf without mismatch.

@@ -13,10 +13,15 @@
   "keywords": [
     "ip",
     "filter",
-    "ip filter",
     "filtering",
+    "tree",
+    "ip filter",
     "ip filtering",
-    "tree"
+    "ip match",
+    "iptable",
+    "iptables",
+    "ip table",
+    "ip tables"
   ],
   "author": "Tsutomu Nakamura <tsuna.0x00@gmail.com> (http://qiita.com/TsutomuNakamura)",
   "license": "MIT",

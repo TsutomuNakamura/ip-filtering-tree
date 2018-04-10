@@ -119,13 +119,21 @@ exports.IPFilteringTree = function() {
         }
     }
 
-    this.deepCopyHashExcept = function(key, hash) {
-        var result = {};
-        Object.keys(hash).forEach(function(k) {
-            if(k != key) {
-                result[k] = hash[k];
-            }
-        });
+    // this.deepCopyHashExcept = function(key, hash) {
+    //     var result = {};
+    //     Object.keys(hash).forEach(function(k) {
+    //         if(k != key) {
+    //             result[k] = hash[k];
+    //         }
+    //     });
+    //     return result;
+    // }
+
+    this.copyNode = function(node) {
+        var result                          = new Array(4);
+        result[I_IPV4_DATA]                 = node[I_IPV4_DATA];
+        result[I_IPV4_LENGTH_OF_SUBNETMASK] = node[I_IPV4_LENGTH_OF_SUBNETMASK];
+
         return result;
     }
 
@@ -384,6 +392,35 @@ exports.IPFilteringTree = function() {
         }
 
         return result;
+    }
+
+
+    this.getAllEntries = function () {
+        var root = iPv4Dict;
+        var result = _getAllNodeList(root, []);
+
+        if (root[I_IPv4_DATA] !== undefined) {
+            result.push(this.copyNode(root));
+        }
+
+        return result;
+    }
+
+    this._getAllNodeList = function _getAllNodeList(node, result) {
+        var childEntriesMap = node[I_IPV4_REF_CHILD_NODE];
+        var childEntries    = Object.keys(childEntriesMap);
+
+        if (childEntries.length === 0 && childEntriesMap.constructor === Object) {
+            return undefined;
+        }
+
+        for (var e in childEntries) {
+            this._getAllNodeList(e, result);
+        }
+
+        if (node[I_IPV4_DATA] !== undefined) {
+            result.push();
+        }
     }
 
     this.createGlueNodes = function (node, subnetLength){

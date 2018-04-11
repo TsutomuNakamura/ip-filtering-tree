@@ -2625,14 +2625,15 @@ describe('IPFilteringTree', () => {
             assertTheNode(node1, "Data of 192.168.2.0/32", 32, undefined, []);
         });
     });
-    describe('#getAllEntries', () => {
+    describe('#getAllIndexes', () => {
         it('should get no entries if tree is empty.', () => {
-            var result = dict.getAllEntries();
+            var result = dict.getAllIndexes();
             should.not.exist(result);
+            console.log(result);
         });
 
-        it('should get entries {ip:}', () => {
-        });
+        // it('should get entries {ip:}', () => {
+        // });
     });
 });
 

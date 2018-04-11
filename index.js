@@ -25,6 +25,7 @@ exports.IPFilteringTree = function() {
     /** Index of reference of child node */
     const I_IPV4_REF_CHILD_NODE             = 3;
 
+
     var iPv4Dict = [  /* node to store root node */
         undefined,
         undefined,
@@ -394,19 +395,20 @@ exports.IPFilteringTree = function() {
         return result;
     }
 
+    // {ip: "ipaddress", mask: "subnet mask(x.x.x.x/x)"}
+    this.getAllIndexes = function () {
+        var root = iPv4Dict[I_IPV4_REF_CHILD_NODE][0];     /* Index 0 is always existed */
+        var result = [];
+        this._getAllIndexes(0, root, result);
 
-    this.getAllEntries = function () {
-        var root = iPv4Dict;
-        var result = _getAllNodeList(root, []);
-
-        if (root[I_IPv4_DATA] !== undefined) {
+        if (root[I_IPV4_DATA] !== undefined) {
             result.push(this.copyNode(root));
         }
 
-        return result;
+        return (Object.keys(result) ? undefined : result );
     }
 
-    this._getAllNodeList = function _getAllNodeList(node, result) {
+    this._getAllIndexes = function (index, node, result) {
         var childEntriesMap = node[I_IPV4_REF_CHILD_NODE];
         var childEntries    = Object.keys(childEntriesMap);
 
@@ -415,11 +417,13 @@ exports.IPFilteringTree = function() {
         }
 
         for (var e in childEntries) {
-            this._getAllNodeList(e, result);
+            this._getAllIndexes(e, node[I_IPV4_REF_CHILD_NODE][e], result);
         }
 
         if (node[I_IPV4_DATA] !== undefined) {
-            result.push();
+            result.push(
+                {ip: index, subnetmask: node[I_IPV4_REF_CHILD_NODE]}
+            );
         }
     }
 

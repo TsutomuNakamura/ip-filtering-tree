@@ -403,15 +403,13 @@ exports.IPFilteringTree = function() {
 
         //if (root[I_IPV4_DATA] !== undefined) {
         if (root[I_IPV4_DATA]  !== undefined) {
-            console.log("vvvvvvvvv" + this.copyNode(root));
-
             //result.push(this.copyNode(iPv4Dict));
             result.push({
-                ip: root["0.0.0.0"]
+                ip: "0.0.0.0", mask: 0
             });
         }
 
-        return (Object.keys(result) ? undefined : result );
+        return (result.length === 0 ? undefined : result );
     }
 
     this._getAllIndexes = function (index, node, result) {

@@ -2638,7 +2638,9 @@ describe('IPFilteringTree', () => {
         it('should get entries 0.0.0.0/0 if 0.0.0.0/0 was pushed.', () => {
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             var result = dict.getAllIndexes();
-            should(result[0].ip === "0.0.0.0").ok;
+
+            console.log(result[0].ip === "0.0.0.0");
+            should.equal(result[0].ip === "0.0.0.0", true);
         });
     });
 });

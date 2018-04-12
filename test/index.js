@@ -2625,15 +2625,21 @@ describe('IPFilteringTree', () => {
             assertTheNode(node1, "Data of 192.168.2.0/32", 32, undefined, []);
         });
     });
+
+    function containsIndexes(targets) {
+        
+    }
     describe('#getAllIndexes', () => {
         it('should get no entries if tree is empty.', () => {
             var result = dict.getAllIndexes();
             should.not.exist(result);
-            console.log(result);
         });
 
-        // it('should get entries {ip:}', () => {
-        // });
+        it('should get entries 0.0.0.0/0 if 0.0.0.0/0 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            var result = dict.getAllIndexes();
+            should(result[0].ip === "0.0.0.0").ok;
+        });
     });
 });
 

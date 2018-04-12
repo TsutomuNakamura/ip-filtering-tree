@@ -401,8 +401,14 @@ exports.IPFilteringTree = function() {
         var result = [];
         this._getAllIndexes(0, root, result);
 
-        if (root[I_IPV4_DATA] !== undefined) {
-            result.push(this.copyNode(root));
+        //if (root[I_IPV4_DATA] !== undefined) {
+        if (root[I_IPV4_DATA]  !== undefined) {
+            console.log("vvvvvvvvv" + this.copyNode(root));
+
+            //result.push(this.copyNode(iPv4Dict));
+            result.push({
+                ip: root["0.0.0.0"]
+            });
         }
 
         return (Object.keys(result) ? undefined : result );

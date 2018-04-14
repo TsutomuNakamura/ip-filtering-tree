@@ -45,6 +45,12 @@ db.find("192.168.2.100");    // -> Data of 192.168.2.0/24
 db.find("192.168.101.32");    // -> Data of 192.168.0.0/16
 ```
 
+* getAllIndexes
+```javascript
+getAllIndexes();        // -> [{ip: "192.168.2.0", mask: 24}, {ip: "192.168.1.0", mask: 24}, {ip: "192.168.0.0", 16}]
+// It does not guarantee that the order
+```
+
 * delete
 ```javascript
 db.delete("192.168.1.0", 24);    // -> Data of 192.168.1.0/24
@@ -161,7 +167,6 @@ It is the case to search the data reaches middle of the leaf with mismatch.
 ## TODO
 * Apply IPv6 features
 * Apply cache features
-* Implement iterable functions
 
 ## License
 This software is released under the MIT License, see LICENSE.txt.

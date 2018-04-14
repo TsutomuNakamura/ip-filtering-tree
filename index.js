@@ -401,14 +401,6 @@ exports.IPFilteringTree = function() {
         var result = [];
         this._getAllIndexes(0, root, result);
 
-        //if (root[I_IPV4_DATA] !== undefined) {
-        if (root[I_IPV4_DATA]  !== undefined) {
-            //result.push(this.copyNode(iPv4Dict));
-            result.push({
-                ip: "0.0.0.0", mask: 0
-            });
-        }
-
         return (result.length === 0 ? undefined : result );
     }
 
@@ -416,17 +408,13 @@ exports.IPFilteringTree = function() {
         var childEntriesMap = node[I_IPV4_REF_CHILD_NODE];
         var childEntries    = Object.keys(childEntriesMap);
 
-        if (childEntries.length === 0 && childEntriesMap.constructor === Object) {
-            return undefined;
-        }
-
-        for (var e in childEntries) {
-            this._getAllIndexes(e, node[I_IPV4_REF_CHILD_NODE][e], result);
+        for (var i in childEntries) {
+            this._getAllIndexes(childEntries[i], node[I_IPV4_REF_CHILD_NODE][childEntries[i]], result);
         }
 
         if (node[I_IPV4_DATA] !== undefined) {
             result.push(
-                {ip: index, subnetmask: node[I_IPV4_REF_CHILD_NODE]}
+                {ip: this.stringifyFromBinIPv4(index), mask: node[I_IPV4_LENGTH_OF_SUBNETMASK]}
             );
         }
     }
@@ -456,6 +444,7 @@ exports.IPFilteringTree = function() {
         myself._dumpTree(node, maxdepth);
         console.log("<< dump tree to here   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
+
     this._dumpTree = function(node, maxdepth, indent_count = 0, depth = 0) {
         var childKeyList = "";
         var keyOfChildren = Object.keys(node[I_IPV4_REF_CHILD_NODE]);

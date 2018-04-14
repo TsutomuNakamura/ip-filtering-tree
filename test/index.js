@@ -2626,21 +2626,157 @@ describe('IPFilteringTree', () => {
         });
     });
 
-    function containsIndexes(targets) {
-        
+    function containsIndexes(resultMapList, targetMapList) {
+        if(resultMapList.length === 0 && targetMapList.length === 0) {
+            console.log("ERROR: resultMapList.length === 0 && targetMapList.length === 0");
+            return true;
+        }
+        if(resultMapList.length !== targetMapList.length) {
+            console.log("ERROR: resultMapList.length !== targetMapList.length");
+            return false;
+        }
+
+        for(var i = 0; i < targetMapList.length; i++) {
+            var verification = false;
+
+            for(var j = 0; j < resultMapList.length; j++) {
+                if(targetMapList[i].ip === resultMapList[j].ip && targetMapList[i].mask === resultMapList[j].mask) {
+                    verification = true;
+                    break;
+                }
+            }
+            if(verification === false) {
+                console.log("ERROR: verification === false");
+                return false;
+            }
+        }
+
+        return true;
     }
+
     describe('#getAllIndexes', () => {
         it('should get no entries if tree is empty.', () => {
             var result = dict.getAllIndexes();
             should.not.exist(result);
         });
-
         it('should get entries 0.0.0.0/0 if 0.0.0.0/0 was pushed.', () => {
             dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
             var result = dict.getAllIndexes();
-
-            console.log(result[0].ip === "0.0.0.0");
-            should.equal(result[0].ip === "0.0.0.0", true);
+            var expected = [{ip: "0.0.0.0", mask: 0}];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 0.0.0.0/0, 192.168.1.0/24 if 0.0.0.0/0, 192.168.1.0/24 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "0.0.0.0", mask: 0}, {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 192.168.1.0/24 if 192.168.1.0/24 was pushed.', () => {
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 0.0.0.0/0, 192.168.1.0/24, 192.168.2.0/24 if 0.0.0.0/0, 192.168.1.0/24, 192.168.2.0/24 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "0.0.0.0", mask: 0},
+                {ip: "192.168.1.0", mask: 24},
+                {ip: "192.168.2.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 192.168.1.0/24, 192.168.2.0/24 if 192.168.1.0/24, 192.168.2.0/24 was pushed.', () => {
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "192.168.1.0", mask: 24},
+                {ip: "192.168.2.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 0.0.0.0/0, 172.16.0.0/16, 192.168.1.0/24 if 0.0.0.0/0, 172.16.0.0/16, 192.168.1.0/24 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "0.0.0.0", mask: 0},
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 172.16.0.0/16, 192.168.1.0/24 if 172.16.0.0/16, 192.168.1.0/24 was pushed.', () => {
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 0.0.0.0/0, 172.16.0.0/16, 172.17.0.0/16, 192.168.1.0/24 if 0.0.0.0/0, 172.16.0.0/16, 172.17.0.0/16, 192.168.1.0/24 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.17.0.0", 16, "Data of 172.17.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "0.0.0.0", mask: 0},
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "172.17.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 172.16.0.0/16, 172.17.0.0/16, 192.168.1.0/24 if 172.16.0.0/16, 172.17.0.0/16, 192.168.1.0/24 was pushed.', () => {
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("172.17.0.0", 16, "Data of 172.17.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "172.17.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 0.0.0.0/0, 172.16.0.0/16, 192.168.1.0/24, 192.168.2.0/24 if 0.0.0.0/0, 172.16.0.0/16, 192.168.1.0/24, 192.168.2.0/24 was pushed.', () => {
+            dict.push("0.0.0.0", 0, "Data of 0.0.0.0/0");
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "0.0.0.0", mask: 0},
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24},
+                {ip: "192.168.2.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
+        });
+        it('should get entries 172.16.0.0/16, 192.168.1.0/24, 192.168.2.0/24 if 172.16.0.0/16, 192.168.1.0/24, 192.168.2.0/24 was pushed.', () => {
+            dict.push("172.16.0.0", 16, "Data of 172.16.0.0/16");
+            dict.push("192.168.1.0", 24, "Data of 192.168.1.0/24");
+            dict.push("192.168.2.0", 24, "Data of 192.168.2.0/24");
+            var result = dict.getAllIndexes();
+            var expected = [
+                {ip: "172.16.0.0", mask: 16},
+                {ip: "192.168.1.0", mask: 24},
+                {ip: "192.168.2.0", mask: 24}
+            ];
+            should.equal(containsIndexes(result, expected), true);
         });
     });
 });

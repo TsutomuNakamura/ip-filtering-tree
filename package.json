@@ -14,14 +14,10 @@
     "ip",
     "filter",
     "filtering",
+    "firwall",
     "tree",
-    "ip filter",
-    "ip filtering",
     "ip match",
-    "iptable",
-    "iptables",
-    "ip table",
-    "ip tables"
+    "iptables"
   ],
   "author": "Tsutomu Nakamura <tsuna.0x00@gmail.com> (http://qiita.com/TsutomuNakamura)",
   "license": "MIT",
